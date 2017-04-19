@@ -148,7 +148,7 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
 
   <tr>
     <td scope="row">outputDir</td>
-    <td>on ./data/</td>
+    <td>./data/</td>
     <td> User profiles and labels will be output here     </td>
   </tr>
   </table>
