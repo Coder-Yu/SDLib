@@ -6,7 +6,7 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
 <li>1.Configure the **xx.conf** file in the directory named config. (xx is the name of the method you want to run)</li>
 <li>2.Run the **main.py** in the project, and then input following the prompt.</li>
 </ul>
-<h2>How to Configure it</h2>
+<h2>How to Configure the Detection Method</h2>
 <h3>Essential Options</h3>
 <div>
  <table class="table table-hover table-bordered">
@@ -87,5 +87,57 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
     <td>李文涛，等，一种基于流行度分类特征的托攻击检测算法， 自动化学报<br></td>
   </tr>
 
+  </table>
+</div>
+
+<h2>How to generate spammers</h2>
+<ul>
+<li>1.Configure the **xx.conf** file in shillingmodels/config/. </li>
+<li>2.Modify /shillingmodels/generateData.py as needed and run it.</li>
+</ul>
+
+<h2>How to Configure the Shilling Models</h2>
+<h3>Essential Options</h3>
+<div>
+ <table class="table table-hover table-bordered">
+  <tr>
+    <th width="12%" scope="col"> Entry</th>
+    <th width="16%" class="conf" scope="col">Example</th>
+    <th width="72%" class="conf" scope="col">Description</th>
+  </tr>
+  <tr>
+    <td>attackSize</td>
+    <td>0.01</td>
+    <td>The ratio of the injected spammers to genuine users</td>
+  </tr>
+ <tr>
+    <td>fillerSize</td>
+    <td>0.01</td>
+    <td>The ratio of the filler items to all items </td>
+  </tr>
+
+  <tr>
+    <td scope="row">MethodName</td>
+    <td>DegreeSAD/PCASelect/etc.</td>
+    <td>The name of the detection method<br>
+    </td>
+  </tr>
+  <tr>
+    <td scope="row">evaluation.setup</td>
+    <td>-testSet ../dataset/testset.txt</td>
+    <td>Main option: -testSet, -ap, -cv <br>
+      -testSet path/to/test/file   (need to specify the test set manually)<br>
+      -ap ratio   (ap means that the user set (including items and ratings) are automatically partitioned into training set and test set, the number is the ratio of test set. e.g. -ap 0.2)<br>
+      -cv k   (-cv means cross validation, k is the number of the fold. e.g. -cv 5)<br>
+     </td>
+  </tr>
+
+  <tr>
+    <td scope="row">output.setup</td>
+    <td>on -dir ./Results/</td>
+    <td>Main option: whether to output recommendation results<br>
+      -dir path: the directory path of output results.
+       </td>
+  </tr>
   </table>
 </div>

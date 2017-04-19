@@ -21,11 +21,10 @@ class Config(object):
         return self.config.has_key(key)
 
     def readConfiguration(self,fileName):
-        path = '../config/'+fileName
-        if not os.path.exists(abspath(path)):
+        if not os.path.exists(abspath(fileName)):
             print 'config file is not found!'
             raise IOError
-        with open(path) as f:
+        with open(fileName) as f:
             for ind,line in enumerate(f):
                 if line.strip()<>'':
                     try:

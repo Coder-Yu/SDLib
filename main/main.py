@@ -26,7 +26,7 @@ if __name__ == '__main__':
     #     Display(conf).render()
     #     exit(0)
     if order == 1:
-        conf = Config('DegreeSAD.conf')
+        conf = Config('../config/DegreeSAD.conf')
 
 
 
