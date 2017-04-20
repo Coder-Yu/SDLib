@@ -4,6 +4,7 @@ from tool.config import Config
 from tool.file import FileIO
 import random
 import os
+from os.path import abspath
 class Attack(object):
     def __init__(self,conf):
         self.config = Config(conf)
@@ -82,7 +83,7 @@ class Attack(object):
             for user in self.userProfile:
                 labels.append(user+' 0\n')
             f.writelines(labels)
-        print 'User profiles have been generated.'
+        print 'User profiles have been output to '+abspath(self.config['outputDir'])+'.'
 
     def generateProfiles(self,filename):
         ratings = []
@@ -96,5 +97,5 @@ class Attack(object):
                 for item in self.spamProfile[user]:
                     ratings.append(user + ' ' + item + ' ' + str(self.spamProfile[user][item])+'\n')
             f.writelines(ratings)
-        print 'User labels have been generated.'
+        print 'User labels have been output to '+abspath(self.config['outputDir'])+'.'
 

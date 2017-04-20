@@ -15,7 +15,6 @@ class AverageAttack(Attack):
     def insertSpam(self):
         print 'Modeling average attack...'
         itemList = self.itemProfile.keys()
-        userList = self.userProfile.keys()
         startUserID = len(self.userProfile)+1
 
         for i in range(int(len(self.userProfile)*self.attackSize)):

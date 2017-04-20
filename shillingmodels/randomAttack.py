@@ -13,7 +13,6 @@ class RandomAttack(Attack):
     def insertSpam(self):
         print 'Modeling random attack...'
         itemList = self.itemProfile.keys()
-        userList = self.userProfile.keys()
         startUserID = len(self.userProfile)+1
 
         for i in range(int(len(self.userProfile)*self.attackSize)):
