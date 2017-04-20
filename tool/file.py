@@ -20,8 +20,12 @@ class FileIO(object):
     def writeFile(dir,file,content,op = 'w'):
         if not os.path.exists(dir):
             os.makedirs(dir)
-        with open(dir+file,op) as f:
-            f.writelines(content)
+        if type(content)=='str':
+            with open(dir + file, op) as f:
+                f.write(content)
+        else:
+            with open(dir+file,op) as f:
+                f.writelines(content)
 
     @staticmethod
     def deleteFile(filePath):

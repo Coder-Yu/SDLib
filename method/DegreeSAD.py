@@ -75,5 +75,5 @@ class DegreeSAD(SDetection):
         classifier.fit(self.training, self.trainingLabels)
         pred_labels = classifier.predict(self.test)
         print 'Decision Tree:'
-        print classification_report(self.testLabels, pred_labels)
-        return classification_report(self.testLabels, pred_labels)
+        print classification_report(self.testLabels, pred_labels,digits=4)
+        return classification_report(self.testLabels, pred_labels,digits=4)

@@ -60,9 +60,11 @@ class SDetection(object):
 
         # preict the ratings or item ranking
         print 'Predicting %s...' % (self.foldInfo)
-        self.predict()
-
+        report = self.predict()
+        currentTime = currentTime = strftime("%Y-%m-%d %H-%M-%S", localtime(time()))
+        FileIO.writeFile(self.output['-dir'],self.algorName+'@'+currentTime+self.foldInfo,report)
         # save model
         if self.isSave:
             print 'Saving model %s...' % (self.foldInfo)
             self.saveModel()
+        return report

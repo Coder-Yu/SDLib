@@ -6,6 +6,9 @@ from tool.dataSplit import *
 from multiprocessing import Process,Manager
 from tool.file import FileIO
 from time import strftime,localtime,time
+import re
+import numpy as np
+from os.path import abspath
 class SDLib(object):
     def __init__(self,config):
         self.trainingData = []  # training data
@@ -42,12 +45,7 @@ class SDLib(object):
         if config.contains('social'):
             self.socialConfig = LineConfig(self.config['social.setup'])
             self.relation = FileIO.loadRelationship(config,self.config['social'])
-
         print 'preprocessing...'
-
-
-
-
 
 
     def execute(self):
@@ -62,14 +60,13 @@ class SDLib(object):
             manager = Manager()
             m = manager.dict()
             i = 1
-            tasks = []            
-
+            tasks = []
             for train,test in DataSplit.crossValidation(self.trainingData,k):
                 fold = '['+str(i)+']'
                 if self.config.contains('social'):
                     method = self.config['methodName'] + "(self.config,train,test,self.labels,self.relation,fold)"
                 else:
-                    method = self.config['methodName']+ "(self.config,train,test,self.labels,fold)"
+                    method = self.config['methodName'] + "(self.config,train,test,self.labels,fold)"
                #create the process
                 p = Process(target=run,args=(m,eval(method),i))
                 tasks.append(p)
@@ -81,24 +78,39 @@ class SDLib(object):
             for p in tasks:
                 p.join()
             #compute the mean error of k-fold cross validation
-            # self.measure = [dict(m)[i] for i in range(1,k+1)]
-            # res = []
-            # for i in range(len(self.measure[0])):
-            #     measure = self.measure[0][i].split(':')[0]
-            #     total = 0
-            #     for j in range(k):
-            #         total += float(self.measure[j][i].split(':')[1])
-            #     res.append(measure+':'+str(total/k)+'\n')
+            self.measure = [dict(m)[i] for i in range(1,k+1)]
+            res = []
+            pattern = re.compile('(\d+\.\d+)')
+            countPattern = re.compile('\d+\\n')
+            labelPattern = re.compile('\s\d{1}[^\.|\n|\d]')
+            labels = re.findall(labelPattern, self.measure[0])
+            values = np.array([0]*9,dtype=float)
+            count = np.array([0,0,0],dtype=int)
+            for report in self.measure:
+                values += np.array(re.findall(pattern,report),dtype=float)
+                count+=np.array(re.findall(countPattern,report),dtype=int)
+            values/=k
+            values=np.around(values,decimals=4)
+            res.append('             precision  recall  f1-score  support\n\n')
+            res.append('         '+labels[0]+'  '+'    '.join(np.array(values[0:3],dtype=str).tolist())+'   '+str(count[0])+'\n')
+            res.append('         '+labels[1]+'  '+'    '.join(np.array(values[3:6],dtype=str).tolist())+'   '+str(count[1])+'\n')
+            res.append('  avg/total   ' + '    '.join(np.array(values[6:9], dtype=str).tolist()) + '   ' + str(count[2]) + '\n')
+                # for line in lines[1:]:
+                #
+                # measure = self.measure[0][i].split(':')[0]
+                # total = 0
+                # for j in range(k):
+                #     total += float(self.measure[j][i].split(':')[1])
+                # res.append(measure+':'+str(total/k)+'\n')
             #output result
-            # currentTime = strftime("%Y-%m-%d %H-%M-%S", localtime(time()))
-            # outDir = LineConfig(self.config['output.setup'])['-dir']
-            # fileName = self.config['methodName'] +'@'+currentTime+'-'+str(k)+'-fold-cv' + '.txt'
-            # FileIO.writeFile(outDir,fileName,res)
-
-
+            currentTime = strftime("%Y-%m-%d %H-%M-%S", localtime(time()))
+            outDir = LineConfig(self.config['output.setup'])['-dir']
+            fileName = self.config['methodName'] +'@'+currentTime+'-'+str(k)+'-fold-cv' + '.txt'
+            FileIO.writeFile(outDir,fileName,res)
+            print 'The results have been output to '+abspath(LineConfig(self.config['output.setup'])['-dir'])+'\n'
         else:
             if self.config.contains('social'):
-                method = self.config['methodName']+'(self.config,self.trainingData,self.testData,self,labels,self.relation)'
+                method = self.config['methodName'] + '(self.config,self.trainingData,self.testData,self,labels,self.relation)'
             else:
                 method = self.config['methodName'] + '(self.config,self.trainingData,self.testData,self.labels)'
             eval(method).execute()
