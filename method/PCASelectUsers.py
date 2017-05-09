@@ -43,26 +43,24 @@ class PCASelectUsers(SDetection):
                 b = int(item) - 1
                 dataArray[a][b] = value
 
-        pca = PCA(n_components=3)
-        newData = pca.fit_transform(dataArray)
-        print newData
-
-        #for i in newData:
+        # pca = PCA(n_components=3)
+        # newData = pca.fit_transform(dataArray)
+        # print newData
 
 
         #dataMatrix = csr_matrix(dataArray)
         #print dataMatrix
         #print dataMatrix.shape
 
-        # #T
-        # #dataMatrixT = csr_matrix.transpose(dataMatrix)
-        # dataArrayT = np.transpose(dataArray)
-        # #cov
-        # #covMatrix = dataMatrixT.dot(dataMatrix)
-        # covArray = np.dot(dataArrayT, dataArray)
-        # print covArray.shape
-        #
-        # #
+        #T
+        #dataMatrixT = csr_matrix.transpose(dataMatrix)
+        dataArrayT = np.transpose(dataArray)
+        #cov
+        #covMatrix = dataMatrixT.dot(dataMatrix)
+        covArray = np.dot(dataArray, dataArrayT)
+        print covArray.shape
+
+        # # whether the array is symmetric
         # for i in range(0, len(covArray)):
         #     for j in range(0, len(covArray[0])):
         #         if i > j:
@@ -73,16 +71,28 @@ class PCASelectUsers(SDetection):
 
         #covArray = covMatrix.toarray()
         #eigen-value-decomposition
-        #vals, vecs  = np.linalg.eig(covArray)
+        vals, vecs  = np.linalg.eig(covArray)
         # #top-K vals of cov
-        #pairs =[(np.abs(vals[i]), vecs[:,i]) for i in range(len(vals))]
-        #pairs.sort(reverse=True)
-        #first = pairs[0][1]
-        #second = pairs[1][1]
-        #third = pairs[2][1]
+        k = 3
+        valsSort = np.argsort(vals)
+        vecsSort = valsSort[-1:-(k + 1):-1]
+        print vecsSort
+        vecs_k = vecs[ :, k]
+        for i in vecs_k:
+            print i
+
+
+        #print vecs
+        # pairs =[(np.abs(vals[i]), vecs[:,i]) for i in range(len(vals))]
+        # print pairs
+        # pairs.sort(reverse=True)
+        # first = pairs[0][1]
+        # second = pairs[1][1]
+        # third = pairs[2][1]
         # print first
         # print second
         # print third
+        #print vecs
         # distance
         #distanceDict_u = {}
         # for user in covArry:
