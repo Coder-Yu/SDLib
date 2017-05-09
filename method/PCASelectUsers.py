@@ -5,6 +5,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 #from sklearn import preprocessing
 import math
+from sklearn.decomposition import PCA
 
 class PCASelectUsers(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
@@ -42,33 +43,54 @@ class PCASelectUsers(SDetection):
                 b = int(item) - 1
                 dataArray[a][b] = value
 
-        dataMatrix = csr_matrix(dataArray)
+        pca = PCA(n_components=3)
+        newData = pca.fit_transform(dataArray)
+        print newData
+
+        #for i in newData:
+
+
+        #dataMatrix = csr_matrix(dataArray)
         #print dataMatrix
         #print dataMatrix.shape
 
-        #T
-        dataMatrixT = csr_matrix.transpose(dataMatrix)
-        #cov
-        covMatrix = dataMatrixT.dot(dataMatrix)
-        covArry = covMatrix.toarray()
-        D,V = np.linalg.eig(covArry)
-        pca1 = V[:, 0]
-        pca2 = V[:, 1]
-        pca3 = V[:, 3]
+        # #T
+        # #dataMatrixT = csr_matrix.transpose(dataMatrix)
+        # dataArrayT = np.transpose(dataArray)
+        # #cov
+        # #covMatrix = dataMatrixT.dot(dataMatrix)
+        # covArray = np.dot(dataArrayT, dataArray)
+        # print covArray.shape
+        #
+        # #
+        # for i in range(0, len(covArray)):
+        #     for j in range(0, len(covArray[0])):
+        #         if i > j:
+        #             continue
+        #         if covArray[i][j] != covArray[j][i]:
+        #             print 'false'
+        # print 'true'
 
-
-
-
-
-
-
-
-
-        # eigen-value-decomposition
-        # first eigenvector of cov
-        # second eigenvector of cov
-        # third  eigenvector of cov
+        #covArray = covMatrix.toarray()
+        #eigen-value-decomposition
+        #vals, vecs  = np.linalg.eig(covArray)
+        # #top-K vals of cov
+        #pairs =[(np.abs(vals[i]), vecs[:,i]) for i in range(len(vals))]
+        #pairs.sort(reverse=True)
+        #first = pairs[0][1]
+        #second = pairs[1][1]
+        #third = pairs[2][1]
+        # print first
+        # print second
+        # print third
         # distance
+        #distanceDict_u = {}
+        # for user in covArry:
+        #     distance = pca1*(user**2)+pca2*(user**2)+pca3*(user**2)
+        #     print distance
+        #     distanceDict_u[user] = float(distance)
+        # print distanceDict_u
+
 
 
 
