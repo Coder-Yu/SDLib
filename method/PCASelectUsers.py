@@ -72,14 +72,28 @@ class PCASelectUsers(SDetection):
         #covArray = covMatrix.toarray()
         #eigen-value-decomposition
         vals, vecs  = np.linalg.eig(covArray)
-        # #top-K vals of cov
-        k = 3
-        valsSort = np.argsort(vals)
-        vecsSort = valsSort[-1:-(k + 1):-1]
-        print vecsSort
-        vecs_k = vecs[ :, k]
-        for i in vecs_k:
+        for i in vals:
             print i
+        # #top-K vals of cov
+        k = 10
+        # valsSort = np.argsort(vals)
+        # vecsSort = valsSort[-1:-(k + 1):-1]
+        # print vecsSort
+        pairs = [(np.abs(vals[i]), vecs[:, i]) for i in range(len(vals))]
+        print pairs
+
+        for i in pairs:
+            pairs[i][0]
+        first = pairs[0][1]
+        second = pairs[1][1]
+        third = pairs[2][1]
+        print first
+        print second
+        print third
+
+
+        # vecs_k = vecs[ :, k]
+        # print vecs_k
 
 
         #print vecs
