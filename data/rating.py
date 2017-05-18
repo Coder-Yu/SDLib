@@ -140,7 +140,8 @@ class RatingDAO(object):
         recordCount = 0
         for user in self.trainingData:
             recordCount+=len(self.trainingData[user])
-        return (len(self.trainingSet_u),len(self.testSet_i),recordCount)
+        return (len(self.trainingSet_u),len(self.trainingSet_i),recordCount)
+
 
     def testSize(self):
         recordCount = 0

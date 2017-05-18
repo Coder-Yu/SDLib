@@ -10,6 +10,7 @@ if __name__ == '__main__':
     print '   SDLib: A Python library used to collect shilling detection methods.'
     print '='*80
     print '1. DegreeSAD'
+    print '2. PCASelectUsers'
     print '-'*80
     algor = -1
     conf = -1
@@ -27,8 +28,8 @@ if __name__ == '__main__':
     #     exit(0)
     if order == 1:
         conf = Config('../config/DegreeSAD.conf')
-
-
+    if order == 2:
+        conf = Config('../config/PCASelectUsers.conf')
 
     else:
         print 'Error num!'
