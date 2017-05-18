@@ -93,8 +93,10 @@ class SDLib(object):
             values=np.around(values,decimals=4)
             res.append('             precision  recall  f1-score  support\n\n')
             res.append('         '+labels[0]+'  '+'    '.join(np.array(values[0:3],dtype=str).tolist())+'   '+str(count[0])+'\n')
-            res.append('         '+labels[1]+'  '+'    '.join(np.array(values[3:6],dtype=str).tolist())+'   '+str(count[1])+'\n')
+            res.append('         '+labels[1]+'  '+'    '.join(np.array(values[3:6],dtype=str).tolist())+'   '+str(count[1])+'\n\n')
             res.append('  avg/total   ' + '    '.join(np.array(values[6:9], dtype=str).tolist()) + '   ' + str(count[2]) + '\n')
+            print 'Total:'
+            print ''.join(res)
                 # for line in lines[1:]:
                 #
                 # measure = self.measure[0][i].split(':')[0]
