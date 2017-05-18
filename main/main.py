@@ -14,7 +14,7 @@ if __name__ == '__main__':
     print '-'*80
     algor = -1
     conf = -1
-    #order = input('please enter the num of the method to run it:')
+    order = input('please enter the num of the method to run it:')
     import time
     s = time.clock()
     # if order == 0:
@@ -26,16 +26,14 @@ if __name__ == '__main__':
     #     conf = Config('../config/visual/visual.conf')
     #     Display(conf).render()
     #     exit(0)
-    # if order == 1:
-    #     conf = Config('../config/DegreeSAD.conf')
-    # if order == 2:
-    #     conf = Config('../config/PCASelectUsers.conf')
-    conf = Config('../config/PCASelectUsers.conf')
+    if order == 1:
+        conf = Config('../config/DegreeSAD.conf')
+    if order == 2:
+        conf = Config('../config/PCASelectUsers.conf')
 
-
-    # else:
-    #     print 'Error num!'
-    #     exit(-1)
+    else:
+        print 'Error num!'
+        exit(-1)
     sd = SDLib(conf)
     sd.execute()
     e = time.clock()
