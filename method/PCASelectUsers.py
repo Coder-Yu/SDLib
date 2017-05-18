@@ -2,13 +2,16 @@ from baseclass.SDetection import SDetection
 from sklearn.metrics import classification_report
 from sklearn import preprocessing
 import numpy as np
-#from sklearn import preprocessing
-import math
+from sklearn import metrics
 
 
 class PCASelectUsers(SDetection):
-    def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
+    def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]', k=None, n=None ):
         super(PCASelectUsers, self).__init__(conf, trainingSet, testSet, labels, fold)
+        # K = top-K vals of cov
+        self.k = 3
+        # n = attack size
+        self.n = 0.1
 
     def buildModel(self):
         #array initialization
@@ -33,48 +36,30 @@ class PCASelectUsers(SDetection):
         #eigen-value-decomposition
         vals, vecs  = np.linalg.eig(covArray)
         #top-K vals of cov
-        k = 5
         valsInd = np.argsort(vals)
-        #valsInd = valsInd[-1:-(k + 1):-1]
-        valsInd = valsInd[0:k:1]
+        valsInd = valsInd[-1:-(self.k + 1):-1]  #descend
+        #valsInd = valsInd[0:self.k:1]          #ascend
         #use np.real() to get real parts
         vecsInd = np.real(vecs[:, valsInd])
-        print vecsInd
-        pca_1 = []
-        pca_2 = []
-        pca_3 = []
-        # pca_4 = []
-        # pca_5 = []
-        for i in vecsInd:
-            pca_1.append(i[0])
-            pca_2.append(i[1])
-            pca_3.append(i[2])
-            # pca_4.append(i[3])
-            # pca_5.append(i[4])
-        # print pca_1
-        # print pca_2
-        # print pca_3
 
         newArray = np.dot(dataArray**2, np.real(vecsInd))
-        #print newArray
 
         distanceDict = {}
         userId = 1
         for user in newArray:
             distance = 0
-            #print user
             for tmp in user:
                 distance += tmp
             distanceDict[userId] = float(distance)
             userId += 1
-        #print distanceDict
 
+        #predict spammer
         disSort = sorted(distanceDict.iteritems(), key=lambda d: d[1], reverse=False)
-        #print disSort
         spamList = []
 
+
         i = 0
-        while i <= 0.1 * len(disSort):
+        while i < self.n * len(disSort):
             spam = disSort[i]
             spamId = int(spam[0]-1)
             spamList.append(spamId)
@@ -85,11 +70,11 @@ class PCASelectUsers(SDetection):
         for user in self.dao.trainingSet_u:
             userInd = int(user) -1
             self.trueLabels[userInd] = self.labels[user]
-        #print self.trueLabels
 
 
     def predict(self):
         print classification_report(self.trueLabels, self.predLabels, digits=4)
+        print metrics.confusion_matrix(self.trueLabels, self.predLabels)
         return classification_report(self.trueLabels, self.predLabels, digits=4)
 
 
