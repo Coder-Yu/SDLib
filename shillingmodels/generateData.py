@@ -5,4 +5,4 @@ from randomAttack import RandomAttack
 attack = AverageAttack('./config/config.conf')
 attack.insertSpam()
 attack.generateLabels('labels.txt')
-attack.generateProfiles('profile.txt')
+attack.generateProfiles('profiles.txt')
