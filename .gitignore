@@ -1,6 +1,7 @@
 .idea/
 shillingmodels/data
 results/
+record/
 #dataset/
 visual/visualization
 *.pyc
