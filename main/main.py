@@ -11,6 +11,7 @@ if __name__ == '__main__':
     print '='*80
     print '1. DegreeSAD'
     print '2. PCASelectUsers'
+    print '3. SemiSAD'
     print '-'*80
     algor = -1
     conf = -1
@@ -30,7 +31,8 @@ if __name__ == '__main__':
         conf = Config('../config/DegreeSAD.conf')
     if order == 2:
         conf = Config('../config/PCASelectUsers.conf')
-
+    if order == 3:
+        conf = Config('../config/SemiSAD.conf')
     else:
         print 'Error num!'
         exit(-1)
