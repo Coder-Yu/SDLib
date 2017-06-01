@@ -1,0 +1,7 @@
+.idea/
+shillingmodels/data
+results/
+#dataset/
+visual/visualization
+*.pyc
+
