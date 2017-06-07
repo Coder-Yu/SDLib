@@ -29,9 +29,9 @@ if __name__ == '__main__':
     #     exit(0)
     if order == 1:
         conf = Config('../config/DegreeSAD.conf')
-    if order == 2:
+    elif order == 2:
         conf = Config('../config/PCASelectUsers.conf')
-    if order == 3:
+    elif order == 3:
         conf = Config('../config/SemiSAD.conf')
     else:
         print 'Error num!'
