@@ -189,44 +189,13 @@ class FAP(SDetection):
         # print PUserDict
 
         # predLabels
-        PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
-        #print PSort
-        # top-k user as spammer
-        spamList = []
-        sIndex = 0
-        while sIndex < self.k:
-            spam = PSort[sIndex][0]
-            spamList.append(spam)
-            self.predLabels[spam] = 1
-            sIndex += 1
-        # print spamList
-        # print len(self.predLabels), self.predLabels
+        self.PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
 
-        #trueLabels
-        for user in self.dao.trainingSet_u:
-            userInd = self.dao.user[user]
-            #print type(user), user, userInd
-            self.trueLabels[userInd] = int(self.labels[user])
-        # print len(self.trueLabels)
-        # print self.trueLabels
 
-        #delete seedUser labels
-        differ = 0
-        for user in seedUser:
-            user = int(user - differ)
-            #print type(user)
-            del self.predLabels[user]
-            del self.trueLabels[user]
-            differ += 1
-        # print len(self.trueLabels), self.trueLabels
-        # print len(self.predLabels), self.predLabels
-
-        # print self.dao.userMeans
-        # print self.dao.itemMeans
-        # print self.dao.globalMean
 
 
     def predict(self):
+
         print classification_report(self.trueLabels, self.predLabels, digits=4)
         print metrics.confusion_matrix(self.trueLabels, self.predLabels)
         return classification_report(self.trueLabels, self.predLabels, digits=4)
