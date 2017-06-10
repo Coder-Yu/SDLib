@@ -54,12 +54,12 @@ class FAP(SDetection):
                     wPrime = w
                     self.TPUI[i][j] = wPrime / otherItemW
                     self.TPIU[j][i] = wPrime / otherUserW
-            if i % (m/10) == 0:
-                print 'computing transition probaility of user',i
+            if i % 100 == 0:
+                print 'progress: %d/%d' %(i,m)
 
     def initModel(self):
         # construction of the bipartite graph
-        print "constrructe bipartite graph..."
+        print "constructing bipartite graph..."
         self.bipartiteGraphUI = {}
         for user in self.dao.trainingSet_u:
             tmpUserItemDic = {}  # user-item-point
@@ -74,7 +74,7 @@ class FAP(SDetection):
             # self.bipartiteGraphIU[item] = tmpItemUserDic
             self.bipartiteGraphUI[user] = tmpUserItemDic
         # we do the polish in computing the transition probability
-        print "compute transition probability..."
+        print "computing transition probability..."
         self.__computeTProbability()
 
     def isConvergence(self, PUser, PUserOld):
@@ -130,7 +130,7 @@ class FAP(SDetection):
             PItem = np.dot(self.TPIU, PUser)
             PUser = np.dot(self.TPUI, PItem)
             iterator += 1
-            print 'This is', iterator,'iterator'
+            print self.foldInfo,'iteration', iterator
 
         PUserDict = {}
         userId = 0
