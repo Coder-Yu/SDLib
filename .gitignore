@@ -1,9 +1,7 @@
 .idea/
 shillingmodels/data
 results/
-record/
 #dataset/
 visual/visualization
-method/FAPlocal.py
 *.pyc
 
