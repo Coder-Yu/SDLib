@@ -86,7 +86,9 @@ class FAP(SDetection):
                 return True
         return False
 
+
     def buildModel(self):
+
         # -------init--------
         m, n, tmp = self.dao.trainingSize()
         PUser = np.zeros(m)
@@ -99,19 +101,21 @@ class FAP(SDetection):
         for i in self.dao.user:
             if self.labels[i] == '1':
                 spammer.append(self.dao.user[i])
+
         # preserve seedUser Index
-        self.seedUser = []
+        seedUser = []
         randList = []
         for i in range(0, self.s):
             randNum = random.randint(0, len(spammer)-1)
             while randNum in randList:
                 randNum = random.randint(0, self.s)
             randList.append(randNum)
-            self.seedUser.append(int(spammer[randNum]))
+            seedUser.append(int(spammer[randNum]))
 
         #initial user and item spam probability
         for j in range(0, m):
-            if j in self.seedUser:
+            if j in seedUser:
+                #print type(j),j
                 PUser[j] = 1
             else:
                 PUser[j] = random.random()
@@ -123,7 +127,7 @@ class FAP(SDetection):
         iterator = 0
         while self.isConvergence(PUser, PUserOld):
         #while iterator < 100:
-            for j in self.seedUser:
+            for j in seedUser:
                 PUser[j] = 1
             PUserOld = PUser
             PItem = np.dot(self.TPIU, PUser)
@@ -131,42 +135,41 @@ class FAP(SDetection):
             iterator += 1
             print 'This is', iterator,'iterator'
 
+        # preserve user spam probability
         PUserDict = {}
         userId = 0
         for i in PUser:
             PUserDict[userId] = i
             userId += 1
-        for j in self.seedUser:
+        for j in seedUser:
             del PUserDict[j]
+        PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
 
-
-        self.PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
-
-    def predict(self):
+        # predLabels
         # top-k user as spammer
         spamList = []
         sIndex = 0
         while sIndex < self.k:
-            spam = self.PSort[sIndex][0]
+            spam = PSort[sIndex][0]
             spamList.append(spam)
             self.predLabels[spam] = 1
             sIndex += 1
 
-        # trueLabels
+        #trueLabels
         for user in self.dao.trainingSet_u:
             userInd = self.dao.user[user]
-            # print type(user), user, userInd
             self.trueLabels[userInd] = int(self.labels[user])
 
-        # delete seedUser labels
+        #delete seedUser labels
         differ = 0
-        for user in self.seedUser:
+        for user in seedUser:
             user = int(user - differ)
-            # print type(user)
+            #print type(user)
             del self.predLabels[user]
             del self.trueLabels[user]
             differ += 1
 
+    def predict(self):
         print classification_report(self.trueLabels, self.predLabels, digits=4)
         print metrics.confusion_matrix(self.trueLabels, self.predLabels)
         return classification_report(self.trueLabels, self.predLabels, digits=4)
