@@ -81,8 +81,6 @@ class FAP(SDetection):
                 print 'computing transition probaility of user',i
 
     def initModel(self):
-        # print "compute average value..."
-        # self.__getAverage()
         # construction of the bipartite graph
         print "constrructe bipartite graph..."
         self.bipartiteGraphUI = {}
@@ -90,12 +88,10 @@ class FAP(SDetection):
             tmpUserItemDic = {}  # user-item-point
             for item in self.dao.trainingSet_u[user]:
                 # tmpItemUserDic = {}#item-user-point
-                # compute the w
                 recordValue = float(self.dao.trainingSet_u[user][item])
                 w = 1 + abs((recordValue - self.dao.userMeans[user]) / self.dao.userMeans[user]) + abs(
                     (recordValue - self.dao.itemMeans[item]) / self.dao.itemMeans[item]) + abs(
                     (recordValue - self.dao.globalMean) / self.dao.globalMean)
-                # print w
                 # tmpItemUserDic[user] = w
                 tmpUserItemDic[item] = w
             # self.bipartiteGraphIU[item] = tmpItemUserDic
@@ -112,45 +108,33 @@ class FAP(SDetection):
                 return True
         return False
 
-
     def buildModel(self):
-
         # -------init--------
         m, n, tmp = self.dao.trainingSize()
         PUser = np.zeros(m)
         PItem = np.zeros(n)
         self.trueLabels = [0 for i in range(m)]
         self.predLabels = [0 for i in range(m)]
-        # print self.dao.user
-        # print self.dao.item
-        # print self.labels
-        # print len(self.dao.user), len(self.labels)
-
-        # # invert key and val in self.dao.user
-        # invert_user = dict((v, k) for k, v in self.dao.user.iteritems())
-        # #print invert_user
 
         # preserve the real spammer ID
         spammer = []
         for i in self.dao.user:
             if self.labels[i] == '1':
                 spammer.append(self.dao.user[i])
-        #print len(spammer), spammer
 
         # preserve seedUser Index
-        seedUser = []
+        self.seedUser = []
         randList = []
         for i in range(0, self.s):
             randNum = random.randint(0, len(spammer)-1)
             while randNum in randList:
                 randNum = random.randint(0, self.s)
             randList.append(randNum)
-            seedUser.append(int(spammer[randNum]))
-        #print len(seedUser), seedUser
+            self.seedUser.append(int(spammer[randNum]))
 
         #initial user and item spam probability
         for j in range(0, m):
-            if j in seedUser:
+            if j in self.seedUser:
                 #print type(j),j
                 PUser[j] = 1
             else:
@@ -163,38 +147,32 @@ class FAP(SDetection):
         iterator = 0
         while self.isConvergence(PUser, PUserOld):
         #while iterator < 100:
-            for j in seedUser:
+            for j in self.seedUser:
                 PUser[j] = 1
             PUserOld = PUser
             PItem = np.dot(self.TPIU, PUser)
             PUser = np.dot(self.TPUI, PItem)
             iterator += 1
             print 'This is', iterator,'iterator'
-        # for i in PUser:
-        #     print i
-        #print len(PUser)
 
         PUserDict = {}
         userId = 0
         for i in PUser:
-        #     print i
             PUserDict[userId] = i
             userId += 1
-        # print len(PUserDict)
-        # print PUserDict
-
-        for j in seedUser:
+        for j in self.seedUser:
             del PUserDict[j]
-        # print len(PUserDict)
-        # print PUserDict
 
+        self.PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
+
+
+    def predict(self):
         # predLabels
-        PSort = sorted(PUserDict.iteritems(), key=lambda d: d[1], reverse=True)
         # top-k user as spammer
         spamList = []
         sIndex = 0
         while sIndex < self.k:
-            spam = PSort[sIndex][0]
+            spam = self.PSort[sIndex][0]
             spamList.append(spam)
             self.predLabels[spam] = 1
             sIndex += 1
@@ -207,14 +185,13 @@ class FAP(SDetection):
 
         # delete seedUser labels
         differ = 0
-        for user in seedUser:
+        for user in self.seedUser:
             user = int(user - differ)
             # print type(user)
             del self.predLabels[user]
             del self.trueLabels[user]
             differ += 1
 
-    def predict(self):
         print classification_report(self.trueLabels, self.predLabels, digits=4)
         print metrics.confusion_matrix(self.trueLabels, self.predLabels)
         return classification_report(self.trueLabels, self.predLabels, digits=4)
