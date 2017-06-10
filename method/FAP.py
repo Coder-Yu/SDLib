@@ -17,29 +17,6 @@ class FAP(SDetection):
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
 
-    # record self.userAvg,user.totalAvvg,self.itemAvvvg
-    def __getAverage(self):
-        # average rating of the user, the average rating of the item, and the global average
-        self.userAvg = {}
-        self.totalAvg = 0
-        for user in self.dao.trainingSet_u:
-            avgPoint = 0
-            for item in self.dao.trainingSet_u[user]:
-                avgPoint += float(self.dao.trainingSet_u[user][item])
-                self.totalAvg += float(self.dao.trainingSet_u[user][item])
-            avgPoint = avgPoint / len(self.dao.trainingSet_u[user])
-            self.userAvg[user] = avgPoint
-        self.totalAvg = self.totalAvg / self.dao.trainingSize()[2]
-
-        self.itemAvg = {}
-        for item in self.dao.trainingSet_i:
-            avgPoint = 0
-            for user in self.dao.trainingSet_i[item]:
-                avgPoint += float(self.dao.trainingSet_i[item][user])
-            avgPoint = avgPoint / len(self.dao.trainingSet_i[item])
-            self.itemAvg[item] = avgPoint
-
-
     # product transition probability matrix self.TPUI and self.TPIU
     def __computeTProbability(self):
         # m--user count; n--item count
