@@ -5,7 +5,6 @@ import numpy as np
 from sklearn import metrics
 
 
-
 class PCASelectUsers(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]', k=None, n=None ):
         super(PCASelectUsers, self).__init__(conf, trainingSet, testSet, labels, fold)
@@ -26,16 +25,11 @@ class PCASelectUsers(SDetection):
         for user in self.dao.trainingSet_u:
             for item in self.dao.trainingSet_u[user].keys():
                 value = self.dao.trainingSet_u[user][item]
-                # print self.dao.user
-                # print self.dao.item
-                a = self.dao.user[user]
-                b = self.dao.item[item]
+                a = int(user) - 1
+                b = int(item) - 1
                 dataArray[a][b] = value
-        print dataArray
-        print dataArray.shape
 
         dataArray = preprocessing.scale(dataArray, axis=0)
-        print '1'
         dataArrayT = np.transpose(dataArray)
         #cov
         covArray = np.dot(dataArrayT, dataArray)
@@ -48,14 +42,14 @@ class PCASelectUsers(SDetection):
         #use np.real() to get real parts
         vecsInd = np.real(vecs[:, valsInd])
 
-        newArray = np.dot(dataArray, np.real(vecsInd))
-        print '111'
+        newArray = np.dot(dataArray**2, np.real(vecsInd))
+
         distanceDict = {}
         userId = 1
         for user in newArray:
             distance = 0
             for tmp in user:
-                distance += tmp**2
+                distance += tmp
             distanceDict[userId] = float(distance)
             userId += 1
 
@@ -74,7 +68,7 @@ class PCASelectUsers(SDetection):
 
         #trueLabels
         for user in self.dao.trainingSet_u:
-            userInd = self.dao.user[user]
+            userInd = int(user) -1
             self.trueLabels[userInd] = self.labels[user]
 
 
