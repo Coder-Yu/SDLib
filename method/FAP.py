@@ -13,7 +13,7 @@ class FAP(SDetection):
     def readConfiguration(self):
         super(FAP, self).readConfiguration()
         # # s means the number of seedUser who be regarded as spammer in training
-        self.s =int( self.config['seedUser'])
+        self.s =int(self.config['seedUser'])
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
 
@@ -98,16 +98,18 @@ class FAP(SDetection):
         for i in self.dao.user:
             if self.labels[i] == '1':
                 spammer.append(self.dao.user[i])
+        print len(spammer)
 
         # preserve seedUser Index
         self.seedUser = []
-        randList = []
+        randDict = {}
         for i in range(0, self.s):
             randNum = random.randint(0, len(spammer)-1)
-            while randNum in randList:
-                randNum = random.randint(0, self.s)
-            randList.append(randNum)
+            while randNum in randDict:
+                randNum = random.randint(0, len(spammer)-1)
+            randDict[randNum]= 0
             self.seedUser.append(int(spammer[randNum]))
+        print len(randDict), randDict
 
         #initial user and item spam probability
         for j in range(0, m):
