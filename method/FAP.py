@@ -14,10 +14,24 @@ class FAP(SDetection):
         super(FAP, self).readConfiguration()
         # # s means the number of seedUser who be regarded as spammer in training
         self.s =int( self.config['seedUser'])
+        # preserve the real spammer ID
+        self.spammer = []
+        for i in self.dao.user:
+            if self.labels[i] == '1':
+                self.spammer.append(self.dao.user[i])
+        sThreshold = int(0.5 * len(self.spammer))
+        if self.s > sThreshold :
+            self.s = sThreshold
+            print '*** seedUser is more than a half of spammer, so it is set to', sThreshold, '***'
+
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
-
+        kThreshlod = int(0.1 * (len(self.dao.user) - self.s))
+        if self.k > kThreshlod:
+            self.k = kThreshlod
+            print '*** the number of top-K users is more than threshlod value, so it is set to', kThreshlod, '***'
     # product transition probability matrix self.TPUI and self.TPIU
+
     def __computeTProbability(self):
         # m--user count; n--item count
         m, n, tmp = self.dao.trainingSize()
@@ -93,21 +107,15 @@ class FAP(SDetection):
         self.trueLabels = [0 for i in range(m)]
         self.predLabels = [0 for i in range(m)]
 
-        # preserve the real spammer ID
-        spammer = []
-        for i in self.dao.user:
-            if self.labels[i] == '1':
-                spammer.append(self.dao.user[i])
-
         # preserve seedUser Index
         self.seedUser = []
         randDict = {}
         for i in range(0, self.s):
-            randNum = random.randint(0, len(spammer) - 1)
+            randNum = random.randint(0, len(self.spammer) - 1)
             while randNum in randDict:
-                randNum = random.randint(0, len(spammer) - 1)
+                randNum = random.randint(0, len(self.spammer) - 1)
             randDict[randNum] = 0
-            self.seedUser.append(int(spammer[randNum]))
+            self.seedUser.append(int(self.spammer[randNum]))
             # print len(randDict), randDict
 
         #initial user and item spam probability
