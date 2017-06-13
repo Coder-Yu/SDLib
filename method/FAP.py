@@ -101,13 +101,14 @@ class FAP(SDetection):
 
         # preserve seedUser Index
         self.seedUser = []
-        randList = []
+        randDict = {}
         for i in range(0, self.s):
-            randNum = random.randint(0, len(spammer)-1)
-            while randNum in randList:
-                randNum = random.randint(0, self.s)
-            randList.append(randNum)
+            randNum = random.randint(0, len(spammer) - 1)
+            while randNum in randDict:
+                randNum = random.randint(0, len(spammer) - 1)
+            randDict[randNum] = 0
             self.seedUser.append(int(spammer[randNum]))
+            # print len(randDict), randDict
 
         #initial user and item spam probability
         for j in range(0, m):
