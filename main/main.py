@@ -9,10 +9,7 @@ if __name__ == '__main__':
     print '='*80
     print '   SDLib: A Python library used to collect shilling detection methods.'
     print '='*80
-    print '1. DegreeSAD'
-    print '2. PCASelectUsers'
-    print '3. SemiSAD'
-    print '4. FAP'
+    print '1. DegreeSAD     2. PCASelectUsers     3. SemiSAD     4. FAP'
     print '-'*80
     algor = -1
     conf = -1
