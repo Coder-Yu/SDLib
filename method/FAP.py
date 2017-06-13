@@ -13,7 +13,7 @@ class FAP(SDetection):
     def readConfiguration(self):
         super(FAP, self).readConfiguration()
         # # s means the number of seedUser who be regarded as spammer in training
-        self.s =int(self.config['seedUser'])
+        self.s =int( self.config['seedUser'])
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
 
@@ -54,12 +54,12 @@ class FAP(SDetection):
                     wPrime = w
                     self.TPUI[i][j] = wPrime / otherItemW
                     self.TPIU[j][i] = wPrime / otherUserW
-            if i % 100 == 0:
-                print 'progress: %d/%d' %(i,m)
+            if i % (m/10) == 0:
+                print 'computing transition probaility of user',i
 
     def initModel(self):
         # construction of the bipartite graph
-        print "constructing bipartite graph..."
+        print "constrructe bipartite graph..."
         self.bipartiteGraphUI = {}
         for user in self.dao.trainingSet_u:
             tmpUserItemDic = {}  # user-item-point
@@ -74,7 +74,7 @@ class FAP(SDetection):
             # self.bipartiteGraphIU[item] = tmpItemUserDic
             self.bipartiteGraphUI[user] = tmpUserItemDic
         # we do the polish in computing the transition probability
-        print "computing transition probability..."
+        print "compute transition probability..."
         self.__computeTProbability()
 
     def isConvergence(self, PUser, PUserOld):
@@ -98,18 +98,16 @@ class FAP(SDetection):
         for i in self.dao.user:
             if self.labels[i] == '1':
                 spammer.append(self.dao.user[i])
-        #print len(spammer)
 
         # preserve seedUser Index
         self.seedUser = []
-        randDict = {}
+        randList = []
         for i in range(0, self.s):
             randNum = random.randint(0, len(spammer)-1)
-            while randNum in randDict:
-                randNum = random.randint(0, len(spammer)-1)
-            randDict[randNum]= 0
+            while randNum in randList:
+                randNum = random.randint(0, self.s)
+            randList.append(randNum)
             self.seedUser.append(int(spammer[randNum]))
-        #print len(randDict), randDict
 
         #initial user and item spam probability
         for j in range(0, m):
@@ -132,7 +130,7 @@ class FAP(SDetection):
             PItem = np.dot(self.TPIU, PUser)
             PUser = np.dot(self.TPUI, PItem)
             iterator += 1
-            print self.foldInfo,'iteration', iterator
+            print 'This is', iterator,'iterator'
 
         PUserDict = {}
         userId = 0
