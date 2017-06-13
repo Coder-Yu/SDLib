@@ -175,7 +175,10 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
 	<td scope="row">SemiSAD</td>
     <td>Cao, Jie, et al. "Shilling attack detection utilizing semi-supervised learning method for collaborative recommender system." World Wide Web 16.5-6 (2013)<br></td>
   </tr>
-
+  <tr>
+	<td scope="row">FAP</td>
+    <td>Zhang, Yongfeng, et al. "Catch the Black Sheep: Unified Framework for Shilling Attack Detection Based on Fraudulent Action Propagation." IJCAI (2015)<br></td>
+  </tr>
   </table>
 </div>
 
