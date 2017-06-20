@@ -107,6 +107,8 @@ class RatingDAO(object):
         #     self.userMeans[u] = mean
         for u in self.trainingSet_u:
             self.userMeans[u] = sum(self.trainingSet_u[u].values())/(len(self.trainingSet_u[u].values())+0.0)
+        for u in self.testSet_u:
+            self.userMeans[u] = sum(self.testSet_u[u].values())/(len(self.testSet_u[u].values())+0.0)
 
     def __computeItemMean(self):
         # for c in self.item:
@@ -123,6 +125,8 @@ class RatingDAO(object):
         #     self.itemMeans[c] = mean
         for item in self.trainingSet_i:
             self.itemMeans[item] = sum(self.trainingSet_i[item].values())/(len(self.trainingSet_i[item].values()) + 0.0)
+        for item in self.testSet_i:
+            self.itemMeans[item] = sum(self.testSet_i[item].values())/(len(self.testSet_i[item].values()) + 0.0)
 
     def getUserId(self,u):
         if self.user.has_key(u):

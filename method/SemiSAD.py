@@ -11,22 +11,27 @@ class SemiSAD(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(SemiSAD, self).__init__(conf, trainingSet, testSet, labels, fold)
 
-    def buildModel(self):
+    def readConfiguration(self):
+        super(SemiSAD, self).readConfiguration()
         # K = top-K vals of cov
-        self.k = 3
+        self.k = int(self.config['topK'])
         # Lambda = λ参数
-        self.Lambda = 0.5
+        self.Lambda = float(self.config['Lambda'])
 
+    def buildModel(self):
         self.H = {}
         self.DegSim = {}
         self.LengVar = {}
         self.RDMA = {}
         self.FMTD = {}
+        print 'Begin feature engineering...'
         # computing H,DegSim,LengVar,RDMA,FMTD for LabledData set
-        self.itemMeans = {}
-        #self.SimList = {}
+        trainingIndex = 0
+        testIndex = 0
+        trainingUserCount, trainingItemCount, trainingrecordCount = self.dao.trainingSize()
+        testUserCount, testItemCount, testrecordCount = self.dao.testSize()
         for user in self.dao.trainingSet_u:
-            S = len(self.dao.trainingSet_u[user])
+            trainingIndex += 1
             self.H[user] = 0
             for i in range(10,50,5):
                 n = 0
@@ -36,27 +41,22 @@ class SemiSAD(SDetection):
                 if n==0:
                     self.H[user] += 0
                 else:
-                    self.H[user] += (-(n/(S*1.0))*math.log(n/(S*1.0)))
+                    self.H[user] += (-(n/(trainingUserCount*1.0))*math.log(n/(trainingUserCount*1.0),2))
 
             SimList = []
             self.DegSim[user] = 0
             for user1 in self.dao.trainingSet_u:
-                A = 0
-                B = 0
-                C = 0
-                D = 0
-                E = 0
-                N = 0
+                userA, userB, C, D, E, Count = 0,0,0,0,0,0
                 for item in list(set(self.dao.trainingSet_u[user]).intersection(set(self.dao.trainingSet_u[user1]))):
-                    A += self.dao.trainingSet_u[user][item]
-                    B += self.dao.trainingSet_u[user1][item]
-                    N += 1
-                if N==0:
+                    userA += self.dao.trainingSet_u[user][item]
+                    userB += self.dao.trainingSet_u[user1][item]
+                    Count += 1
+                if Count==0:
                     AverageA = 0
                     AverageB = 0
                 else:
-                    AverageA = A/N
-                    AverageB = B/N
+                    AverageA = userA/Count
+                    AverageB = userB/Count
                 for item in list(set(self.dao.trainingSet_u[user]).intersection(set(self.dao.trainingSet_u[user1]))):
                     C += (self.dao.trainingSet_u[user][item]-AverageA)*(self.dao.trainingSet_u[user1][item]-AverageB)
                     D += np.square(self.dao.trainingSet_u[user][item]-AverageA)
@@ -66,12 +66,8 @@ class SemiSAD(SDetection):
                 else:
                     SimList.append(C/(math.sqrt(D)*math.sqrt(E)))
             SimList.sort(reverse=True)
-            if self.k<= len(SimList):
-                for i in range(1,self.k):
-                    self.DegSim[user] += SimList[i]/self.k
-            else:
-                for i in range(1,len(SimList)):
-                    self.DegSim[user] += SimList[i] / self.k
+            for i in range(1,self.k+1):
+                self.DegSim[user] += SimList[i] / (self.k)
 
             GlobalAverage = 0
             F = 0
@@ -82,18 +78,13 @@ class SemiSAD(SDetection):
             self.LengVar[user] = abs(len(self.dao.trainingSet_u[user])-GlobalAverage)/(F*1.0)
 
             Divisor = 0
-            for item1 in self.dao.trainingSet_i:
-                self.itemMeans[item1] = sum(self.dao.trainingSet_i[item1].values()) / (len(self.dao.trainingSet_i[item1]) + 0.0)
-            for item2 in self.dao.trainingSet_u[user]:
-                Divisor += abs(self.dao.trainingSet_u[user][item2]-self.itemMeans[item2])/len(self.dao.trainingSet_i[item2])
+            for item1 in self.dao.trainingSet_u[user]:
+                Divisor += abs(self.dao.trainingSet_u[user][item1]-self.dao.itemMeans[item1])/len(self.dao.trainingSet_i[item1])
             self.RDMA[user] = Divisor/len(self.dao.trainingSet_u[user])
 
-            Minuend = 0
-            index1 = 0
-            Subtrahend  = 0
-            index2 = 0
+            Minuend, index1, Subtrahend, index2 = 0, 0, 0, 0
             for item3 in self.dao.trainingSet_u[user]:
-                if(self.dao.trainingSet_u[user][item3]==5.0):
+                if(self.dao.trainingSet_u[user][item3]==5.0 or self.dao.trainingSet_u[user][item3]==1.0) :
                     Minuend += sum(self.dao.trainingSet_i[item3].values())
                     index1 += len(self.dao.trainingSet_i[item3])
                 else:
@@ -108,9 +99,20 @@ class SemiSAD(SDetection):
             else:
                 self.FMTD[user] = abs(Minuend / index1 - Subtrahend / index2)
 
+            if trainingIndex==(trainingUserCount/5):
+                print 'trainingData Done 20%...'
+            elif trainingIndex==(trainingUserCount/5*2):
+                print 'trainingData Done 40%...'
+            elif trainingIndex==(trainingUserCount/5*3):
+                print 'trainingData Done 60%...'
+            elif trainingIndex==(trainingUserCount/5*4):
+                print 'trainingData Done 80%...'
+            elif trainingIndex==(trainingUserCount):
+                print 'trainingData Done 100%...'
+
         # computing H,DegSim,LengVar,RDMA,FMTD for UnLabledData set
         for user in self.dao.testSet_u:
-            S = len(self.dao.testSet_u[user])
+            testIndex += 1
             self.H[user] = 0
             for i in range(10,50,5):
                 n = 0
@@ -120,27 +122,22 @@ class SemiSAD(SDetection):
                 if n==0:
                     self.H[user] += 0
                 else:
-                    self.H[user] += (-(n/(S*1.0))*math.log(n/(S*1.0)))
+                    self.H[user] += (-(n/(testUserCount*1.0))*math.log(n/(testUserCount*1.0),2))
 
             SimList = []
             self.DegSim[user] = 0
             for user1 in self.dao.testSet_u:
-                A = 0
-                B = 0
-                C = 0
-                D = 0
-                E = 0
-                N = 0
+                userA, userB, C, D, E, Count = 0,0,0,0,0,0
                 for item in list(set(self.dao.testSet_u[user]).intersection(set(self.dao.testSet_u[user1]))):
-                    A += self.dao.testSet_u[user][item]
-                    B += self.dao.testSet_u[user1][item]
-                    N += 1
-                if N==0:
+                    userA += self.dao.testSet_u[user][item]
+                    userB += self.dao.testSet_u[user1][item]
+                    Count += 1
+                if Count==0:
                     AverageA = 0
                     AverageB = 0
                 else:
-                    AverageA = A/N
-                    AverageB = B/N
+                    AverageA = userA/Count
+                    AverageB = userB/Count
                 for item in list(set(self.dao.testSet_u[user]).intersection(set(self.dao.testSet_u[user1]))):
                     C += (self.dao.testSet_u[user][item]-AverageA)*(self.dao.testSet_u[user1][item]-AverageB)
                     D += np.square(self.dao.testSet_u[user][item]-AverageA)
@@ -150,12 +147,8 @@ class SemiSAD(SDetection):
                 else:
                     SimList.append(C/(math.sqrt(D)*math.sqrt(E)))
             SimList.sort(reverse=True)
-            if self.k<= len(SimList):
-                for i in range(1,self.k):
-                    self.DegSim[user] += SimList[i]/self.k
-            else:
-                for i in range(1,len(SimList)):
-                    self.DegSim[user] += SimList[i] / self.k
+            for i in range(1,self.k+1):
+                self.DegSim[user] += SimList[i] / self.k
 
             GlobalAverage = 0
             F = 0
@@ -166,18 +159,13 @@ class SemiSAD(SDetection):
             self.LengVar[user] = abs(len(self.dao.testSet_u[user])-GlobalAverage)/(F*1.0)
 
             Divisor = 0
-            for item1 in self.dao.testSet_i:
-                self.itemMeans[item1] = sum(self.dao.testSet_i[item1].values()) / (len(self.dao.testSet_i[item1]) + 0.0)
-            for item2 in self.dao.testSet_u[user]:
-                Divisor += abs(self.dao.testSet_u[user][item2]-self.itemMeans[item2])/len(self.dao.testSet_i[item2])
+            for item1 in self.dao.testSet_u[user]:
+                Divisor += abs(self.dao.testSet_u[user][item1]-self.dao.itemMeans[item1])/len(self.dao.testSet_i[item1])
             self.RDMA[user] = Divisor/len(self.dao.testSet_u[user])
 
-            Minuend = 0
-            index1 = 0
-            Subtrahend  = 0
-            index2 = 0
+            Minuend, index1, Subtrahend, index2= 0,0,0,0
             for item3 in self.dao.testSet_u[user]:
-                if(self.dao.testSet_u[user][item3]==5.0):
+                if(self.dao.testSet_u[user][item3]==5.0 or self.dao.testSet_u[user][item3]==1.0):
                     Minuend += sum(self.dao.testSet_i[item3].values())
                     index1 += len(self.dao.testSet_i[item3])
                 else:
@@ -192,8 +180,18 @@ class SemiSAD(SDetection):
             else:
                 self.FMTD[user] = abs(Minuend / index1 - Subtrahend / index2)
 
+            if testIndex == testUserCount / 5:
+                 print 'testData Done 20%...'
+            elif testIndex == testUserCount / 5 * 2:
+                print 'testData Done 40%...'
+            elif testIndex == testUserCount / 5 * 3:
+                print 'testData Done 60%...'
+            elif testIndex == testUserCount / 5 * 4:
+                print 'testData Done 80%...'
+            elif testIndex == testUserCount:
+                print 'testData Done 100%...'
 
-         # preparing examples training for LabledData ,test for UnLableData
+        # preparing examples training for LabledData ,test for UnLableData
         self.training = []
         self.trainingLabels = []
         self.test = []
@@ -208,11 +206,13 @@ class SemiSAD(SDetection):
             self.testLabels.append(self.labels[user])
 
     def predict(self):
+            ClassifierN = 0
             classifier = GaussianNB()
             #X_train,X_test,y_train,y_test = train_test_split(self.training,self.trainingLabels,test_size=0.1,random_state=33)
             classifier.fit(self.training, self.trainingLabels)
             # predict UnLabledData
             pred_labelsForTrainingUn = classifier.predict(self.test)
+            print 'Enhanced classifier...'
             while 1 :
                 p1 = pred_labelsForTrainingUn
                 # 将带λ参数的无标签数据拟合入分类器
@@ -221,8 +221,12 @@ class SemiSAD(SDetection):
                 p2 = pred_labelsForTrainingUn
                 # 判断分类器是否稳定
                 if list(p1)==list(p2) :
+                    ClassifierN += 1
+                elif ClassifierN > 0:
+                    ClassifierN = 0
+                if ClassifierN == 20:
                     break
             pred_labels = classifier.predict(self.test)
-            print 'naive_bayes:'
+            print 'naive_bayes with EM algorithm:'
             print classification_report(self.testLabels, pred_labels, digits=4)
             return classification_report(self.testLabels, pred_labels, digits=4)
