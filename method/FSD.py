@@ -3,15 +3,21 @@ from baseclass.SDetection import SDetection
 import math
 import numpy as np
 from copy import deepcopy
-from sklearn.naive_bayes import GaussianNB
-from sklearn import neighbors
 from sklearn.metrics import classification_report
-class FSD(SDetection):
+import random
+import heapq
+from sklearn import neighbors
+class HySAD(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
-        super(FSD, self).__init__(conf, trainingSet, testSet, labels, fold)
+        super(HySAD, self).__init__(conf, trainingSet, testSet, labels, fold)
+
 
     def buildModel(self):
+        # K = top-K vals of cov
         self.k = 3
+        # Lambda = λ参数
+        self.Lambda = 0.5
+
         self.Entropy = {}
         self.DegSim = {}
         self.LengthVar = {}
@@ -22,12 +28,14 @@ class FSD(SDetection):
         self.FMTD = {}
         self.FMV = {}
         self.FMD = {}
-        self.nearestUser=[]
 
-
-        # computing Entropy,DegSim,LengthVar,RDMA,FMTD....
+        # computing Entropy,DegSim,LengthVar,RDMA,FMTD... for LabledData set
         self.itemMeans = {}
+
+        self.nearestUser = []
+
         for user in self.dao.trainingSet_u:
+
             S = len(self.dao.trainingSet_u[user])
             self.Entropy[user] = 0
             for i in range(10,50,5):
@@ -68,10 +76,7 @@ class FSD(SDetection):
                 else:
                     SimList.append(C/(math.sqrt(D)*math.sqrt(E)))
 
-            self.nearestUser.append(SimList.index(max(SimList))+1)
-
-
-
+            self.nearestUser.append(SimList.index(max(SimList)))
 
             SimList.sort(reverse=True)
             if self.k<= len(SimList):
@@ -151,12 +156,6 @@ class FSD(SDetection):
                 self.MeanVar[user] = 0
             else:
                 self.MeanVar[user]= self.Divisor4/(len(self.dao.trainingSet_u[user])-1)
-
-
-
-
-
-
 
 
         # computing Entropy,DegSim,LengthVar,RDMA,FMTD.... for UnLabledData set
@@ -290,22 +289,48 @@ class FSD(SDetection):
         self.test = []
         self.testLabels = []
 
+
+        self.featureWeight= [0,0,0,0,0,0,0,0,0,0]
+        self.slectFeatureTrain = []
+        self.slectFeatureTest = []
+
         for user in self.dao.trainingSet_u:
             self.training.append([self.Entropy[user], self.DegSim[user], self.LengthVar[user],self.RDMA[user],self.FMTD[user]
                                      ,self.WDMA[user],self.WDA[user],self.FMV[user],self.MeanVar[user],self.FMD[user]])
             self.trainingLabels.append(self.labels[user])
 
+        for sampleTimes in range(0,500): #sample times = 500
+            randUser = random.randint(0,len(self.dao.trainingSet_u)) # choose random user
+            neiborUser = self.nearestUser[randUser]
+            for i in range(0,10):
+                self.featureWeight[i]=(self.featureWeight[i]+(self.training[randUser][i]-self.training[neiborUser][i])) #待改
+        self.topFeature = []
+        self.username =self.dao.id2user.values()
+        self.userid = self.dao.id2user.keys()
+        for user in self.dao.trainingSet_u:
+            if user in self.username:
+                userindexTrain=self.userid[self.username.index(user)]
+            for i in range(0,5):
+                self.topFeature.append(self.featureWeight.index(heapq.nlargest(5,self.featureWeight)[i]))
+            self.slectFeatureTrain.append([self.training[userindexTrain][self.topFeature[0]],self.training[userindexTrain][self.topFeature[1]],self.training[userindexTrain][self.topFeature[2]],
+                                      self.training[userindexTrain][self.topFeature[3]],self.training[userindexTrain][self.topFeature[4]]])
+
+
         for user in self.dao.testSet_u:
             self.test.append([self.Entropy[user], self.DegSim[user], self.LengthVar[user],self.RDMA[user],self.FMTD[user]
                                      ,self.WDMA[user],self.WDA[user],self.FMV[user],self.MeanVar[user],self.FMD[user]])
             self.testLabels.append(self.labels[user])
-
+        self.userindex =0
+        for user in self.dao.testSet_u:
+            self.slectFeatureTest.append([self.test[i][self.topFeature[0]],self.test[i][self.topFeature[1]],self.test[i][self.topFeature[2]],
+                                 self.test[i][self.topFeature[3]],self.test[i][self.topFeature[4]]])
+            self.userindex+=1
 
 
     def predict(self):
             classifier = neighbors.KNeighborsClassifier()
-            classifier.fit(self.training, self.trainingLabels)
-            pred_labels = classifier.predict(self.test)
-            print 'knn:'
+            classifier.fit(self.slectFeatureTrain ,self.trainingLabels)
+            pred_labels = classifier.predict(self.slectFeatureTest)
+            print 'knn'
             print classification_report(self.testLabels, pred_labels, digits=4)
             return classification_report(self.testLabels, pred_labels, digits=4)
