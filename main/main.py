@@ -36,7 +36,7 @@ if __name__ == '__main__':
     elif order == 4:
         conf = Config('../config/FAP.conf')
 
-    elif order == 5:
+    elif order ==  5:
         conf = Config('../config/HySAD.conf')
 
     else:
