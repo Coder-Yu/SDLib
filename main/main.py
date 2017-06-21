@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #     exit(0)
     if order == 1:
         conf = Config('../config/DegreeSAD.conf')
-    elif order == 2:
+    elif order  == 2:
         conf = Config('../config/PCASelectUsers.conf')
 
     elif order == 3:

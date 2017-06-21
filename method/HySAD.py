@@ -24,7 +24,7 @@ class HySAD(SDetection):
         self.RDMA = {}
         self.WDMA = {}
         self.WDA = {}
-        self.MeanVar = {}
+        self.MeanVar =  {}
         self.FMTD = {}
         self.FMV = {}
         self.FMD = {}
