@@ -20,8 +20,8 @@ class DegreeSAD(SDetection):
         for user in self.dao.trainingSet_u:
             self.MUD[user] = 0
             for item in self.dao.trainingSet_u[user]:
-                self.MUD[user] += len(self.dao.trainingSet_i[item]) / float(maxLength)
-
+                self.MUD[user] += len(self.dao.trainingSet_i[item])# / float(maxLength)
+            self.MUD[user]/float(len(self.dao.trainingSet_u[user]))
             lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.trainingSet_u[user]]
             lengthList.sort(reverse=True)
             self.RUD[user] = lengthList[0] - lengthList[-1]
