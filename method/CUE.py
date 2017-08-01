@@ -3,12 +3,30 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 # from random import shuffle
 from sklearn.metrics import classification_report
+import numpy as np
 from sklearn.tree import DecisionTreeClassifier
-
+from tool.config import Config,LineConfig
 
 class CUE(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(CUE, self).__init__(conf, trainingSet, testSet, labels, fold)
+
+    def readConfiguration(self):
+        super(CUE, self).readConfiguration()
+        # set the reduced dimension
+        self.k = int(LineConfig(self.config['CUE'])['-k'])
+        #iteration count
+        self.epoch = int(LineConfig(self.config['CUE'])['-e'])
+        # set learning rate
+        self.lRate = int(LineConfig(self.config['CUE'])['-r'])
+        #length of a walk
+        self.length = int(LineConfig(self.config['CUE'])['-len'])
+        # regularization parameter
+        self.reg = int(LineConfig(self.config['CUE'])['-reg'])
+
+    def initModel(self):
+        self.uContext = np.random.rand(self.dao.trainingSize()[0],self.k)
+        self.like = np.random.rand(self.dao.trainingSize()[0],self.k)
 
     def buildModel(self):
         self.MUD = {}
