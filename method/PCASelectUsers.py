@@ -6,7 +6,6 @@ import numpy as np
 from sklearn import metrics
 import scipy
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import svds
 
 
 class PCASelectUsers(SDetection):
@@ -51,7 +50,6 @@ class PCASelectUsers(SDetection):
         covSM = np.dot(sMT, sMatrix)
         # eigen-value-decomposition
         vals, vecs = scipy.sparse.linalg.eigs(covSM, k=self.k, which='LM')
-
 
         newArray = np.dot(dataArray**2, np.real(vecs))
 
