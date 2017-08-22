@@ -120,6 +120,11 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
     <td>0.001</td>
     <td>The ratio of the selected items to all items </td>
  </tr>
+  <tr>
+    <td>linkSize</td>
+    <td>0.01</td>
+    <td>The ratio of the users maliciously linked by a spammer to all user </td>
+ </tr>
    <tr>
     <td>targetCount</td>
     <td>20</td>
