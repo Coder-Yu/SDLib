@@ -3,6 +3,7 @@ from tool.config import Config,LineConfig
 from os.path import abspath
 from time import strftime,localtime,time
 from tool.file import FileIO
+from sklearn.metrics import classification_report
 class SDetection(object):
 
     def __init__(self,conf,trainingSet=None,testSet=None,labels=None,fold='[1]'):
@@ -12,6 +13,10 @@ class SDetection(object):
         self.foldInfo = fold
         self.labels = labels
         self.dao = RatingDAO(self.config, trainingSet, testSet)
+        self.training = []
+        self.trainingLabels = []
+        self.test = []
+        self.testLabels = []
 
     def readConfiguration(self):
         self.algorName = self.config['methodName']
@@ -60,11 +65,13 @@ class SDetection(object):
 
         # preict the ratings or item ranking
         print 'Predicting %s...' % (self.foldInfo)
-        report = self.predict()
+        prediction = self.predict()
+        report = classification_report(self.testLabels, prediction, digits=4)
         currentTime = currentTime = strftime("%Y-%m-%d %H-%M-%S", localtime(time()))
         FileIO.writeFile(self.output['-dir'],self.algorName+'@'+currentTime+self.foldInfo,report)
         # save model
         if self.isSave:
             print 'Saving model %s...' % (self.foldInfo)
             self.saveModel()
+        print report
         return report

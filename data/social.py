@@ -1,5 +1,5 @@
 import numpy as np
-from structure import sparseMatrix,new_sparseMatrix
+#from structure import sparseMatrix,new_sparseMatrix
 from tool.config import Config,LineConfig
 from tool.qmath import normalize
 import os.path
@@ -12,10 +12,10 @@ class SocialDAO(object):
         self.relation = relation
         self.followees = {}
         self.followers = {}
-        self.trustMatrix = self.__generateSet()
+        #self.trustMatrix = self.__generateSet()
 
     def __generateSet(self):
-        triple = []
+        #triple = []
         for line in self.relation:
             userId1,userId2,weight = line
             #add relations to dict
@@ -30,19 +30,19 @@ class SocialDAO(object):
                 self.user[userId1] = len(self.user)
             if not self.user.has_key(userId2):
                 self.user[userId2] = len(self.user)
-            triple.append([self.user[userId1], self.user[userId2], weight])
-        return new_sparseMatrix.SparseMatrix(triple)
+            #triple.append([self.user[userId1], self.user[userId2], weight])
+        #return new_sparseMatrix.SparseMatrix(triple)
 
-    def row(self,u):
-        #return user u's followees
-        return self.trustMatrix.row(self.user[u])
-
-    def col(self,u):
-        #return user u's followers
-        return self.trustMatrix.col(self.user[u])
-
-    def elem(self,u1,u2):
-        return self.trustMatrix.elem(u1,u2)
+    # def row(self,u):
+    #     #return user u's followees
+    #     return self.trustMatrix.row(self.user[u])
+    #
+    # def col(self,u):
+    #     #return user u's followers
+    #     return self.trustMatrix.col(self.user[u])
+    #
+    # def elem(self,u1,u2):
+    #     return self.trustMatrix.elem(u1,u2)
 
     def weight(self,u1,u2):
         if self.followees.has_key(u1) and self.followees[u1].has_key(u2):
@@ -50,8 +50,8 @@ class SocialDAO(object):
         else:
             return 0
 
-    def trustSize(self):
-        return self.trustMatrix.size
+    # def trustSize(self):
+    #     return self.trustMatrix.size
 
     def getFollowers(self,u):
         if self.followers.has_key(u):

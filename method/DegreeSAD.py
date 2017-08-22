@@ -1,12 +1,12 @@
-from baseclass.SDetection import SDetection
+from baseclass.SSDetection import SSDetection
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 # from random import shuffle
-from sklearn.metrics import classification_report
+
 from sklearn.tree import DecisionTreeClassifier
 
 
-class DegreeSAD(SDetection):
+class DegreeSAD(SSDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(DegreeSAD, self).__init__(conf, trainingSet, testSet, labels, fold)
 
@@ -20,7 +20,7 @@ class DegreeSAD(SDetection):
         for user in self.dao.trainingSet_u:
             self.MUD[user] = 0
             for item in self.dao.trainingSet_u[user]:
-                self.MUD[user] += len(self.dao.trainingSet_i[item])# / float(maxLength)
+                self.MUD[user] += len(self.dao.trainingSet_i[item]) #/ float(maxLength)
             self.MUD[user]/float(len(self.dao.trainingSet_u[user]))
             lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.trainingSet_u[user]]
             lengthList.sort(reverse=True)
@@ -45,10 +45,6 @@ class DegreeSAD(SDetection):
             self.QUD[user] = lengthList[int((len(lengthList) - 1) / 4.0)]
 
         # preparing examples
-        self.training = []
-        self.trainingLabels = []
-        self.test = []
-        self.testLabels = []
 
         for user in self.dao.trainingSet_u:
             self.training.append([self.MUD[user], self.RUD[user], self.QUD[user]])
@@ -75,5 +71,4 @@ class DegreeSAD(SDetection):
         classifier.fit(self.training, self.trainingLabels)
         pred_labels = classifier.predict(self.test)
         print 'Decision Tree:'
-        print classification_report(self.testLabels, pred_labels,digits=4)
-        return classification_report(self.testLabels, pred_labels,digits=4)
+        return pred_labels

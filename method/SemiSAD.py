@@ -192,10 +192,6 @@ class SemiSAD(SDetection):
                 print 'testData Done 100%...'
 
         # preparing examples training for LabledData ,test for UnLableData
-        self.training = []
-        self.trainingLabels = []
-        self.test = []
-        self.testLabels = []
 
         for user in self.dao.trainingSet_u:
             self.training.append([self.H[user], self.DegSim[user], self.LengVar[user],self.RDMA[user],self.FMTD[user]])
@@ -228,5 +224,4 @@ class SemiSAD(SDetection):
                     break
             pred_labels = classifier.predict(self.test)
             print 'naive_bayes with EM algorithm:'
-            print classification_report(self.testLabels, pred_labels, digits=4)
-            return classification_report(self.testLabels, pred_labels, digits=4)
+            return pred_labels

@@ -112,7 +112,7 @@ class SDLib(object):
             print 'The results have been output to '+abspath(LineConfig(self.config['output.setup'])['-dir'])+'\n'
         else:
             if self.config.contains('social'):
-                method = self.config['methodName'] + '(self.config,self.trainingData,self.testData,self,labels,self.relation)'
+                method = self.config['methodName'] + '(self.config,self.trainingData,self.testData,self.labels,self.relation)'
             else:
                 method = self.config['methodName'] + '(self.config,self.trainingData,self.testData,self.labels)'
             eval(method).execute()

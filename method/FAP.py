@@ -104,7 +104,7 @@ class FAP(SDetection):
         m, n, tmp = self.dao.trainingSize()
         PUser = np.zeros(m)
         PItem = np.zeros(n)
-        self.trueLabels = [0 for i in range(m)]
+        self.testLabels = [0 for i in range(m)]
         self.predLabels = [0 for i in range(m)]
 
         # preserve seedUser Index
@@ -167,7 +167,7 @@ class FAP(SDetection):
         for user in self.dao.trainingSet_u:
             userInd = self.dao.user[user]
             # print type(user), user, userInd
-            self.trueLabels[userInd] = int(self.labels[user])
+            self.testLabels[userInd] = int(self.labels[user])
 
         # delete seedUser labels
         differ = 0
@@ -175,9 +175,7 @@ class FAP(SDetection):
             user = int(user - differ)
             # print type(user)
             del self.predLabels[user]
-            del self.trueLabels[user]
+            del self.testLabels[user]
             differ += 1
 
-        print classification_report(self.trueLabels, self.predLabels, digits=4)
-        print metrics.confusion_matrix(self.trueLabels, self.predLabels)
-        return classification_report(self.trueLabels, self.predLabels, digits=4)
+        return self.predLabels
