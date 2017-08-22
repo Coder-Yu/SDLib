@@ -204,24 +204,42 @@ class SemiSAD(SDetection):
     def predict(self):
             ClassifierN = 0
             classifier = GaussianNB()
-            #X_train,X_test,y_train,y_test = train_test_split(self.training,self.trainingLabels,test_size=0.1,random_state=33)
-            classifier.fit(self.training, self.trainingLabels)
+            X_train,X_test,y_train,y_test = train_test_split(self.training,self.trainingLabels,test_size=0.75,random_state=33)
+            classifier.fit(X_train, y_train)
             # predict UnLabledData
-            pred_labelsForTrainingUn = classifier.predict(self.test)
+            #pred_labelsForTrainingUn = classifier.predict(X_test)
             print 'Enhanced classifier...'
-            while 1 :
-                p1 = pred_labelsForTrainingUn
-                # 将带λ参数的无标签数据拟合入分类器
-                classifier.partial_fit(self.test, pred_labelsForTrainingUn,classes=['0','1'], sample_weight=np.ones(len(self.test),dtype=np.float)*self.Lambda)
-                pred_labelsForTrainingUn = classifier.predict(self.test)
-                p2 = pred_labelsForTrainingUn
-                # 判断分类器是否稳定
-                if list(p1)==list(p2) :
-                    ClassifierN += 1
-                elif ClassifierN > 0:
-                    ClassifierN = 0
-                if ClassifierN == 20:
+            while 1:
+                proba_labelsForTrainingUn = classifier.predict_proba(X_test)
+                X_test_labels = np.hstack((X_test, proba_labelsForTrainingUn))
+                X_test_labels0_sort = sorted(X_test_labels,key=lambda x:x[5],reverse=True)
+                if X_test_labels0_sort[4][5]>X_test_labels0_sort[4][6]:
+                    a = map(lambda x: x[:5], X_test_labels0_sort)
+                    b = a[0:5]
+                    classifier.partial_fit(b, ['0','0','0','0','0'], classes=['0', '1'],sample_weight=np.ones(len(b), dtype=np.float) * self.Lambda)
+                    X_test_labels = X_test_labels0_sort[5:]
+                    X_test = a[5:]
+                X_test_labels0_sort = sorted(X_test_labels, key=lambda x: x[6], reverse=True)
+                if X_test_labels0_sort[4][5]<X_test_labels0_sort[4][6]:
+                    a = map(lambda x: x[:5], X_test_labels0_sort)
+                    b = a[0:5]
+                    classifier.partial_fit(b, ['1', '1', '1', '1', '1'], classes=['0', '1'],sample_weight=np.ones(len(b), dtype=np.float) * 1)
+                    X_test = a[5:]
+                if len(X_test)<6:
                     break
+            # while 1 :
+            #     p1 = pred_labelsForTrainingUn
+            #     # 将带λ参数的无标签数据拟合入分类器
+            #     classifier.partial_fit(X_test, pred_labelsForTrainingUn,classes=['0','1'], sample_weight=np.ones(len(X_test),dtype=np.float)*self.Lambda)
+            #     pred_labelsForTrainingUn = classifier.predict(X_test)
+            #     p2 = pred_labelsForTrainingUn
+            #     # 判断分类器是否稳定
+            #     if list(p1)==list(p2) :
+            #         ClassifierN += 1
+            #     elif ClassifierN > 0:
+            #         ClassifierN = 0
+            #     if ClassifierN == 20:
+            #         break
             pred_labels = classifier.predict(self.test)
             print 'naive_bayes with EM algorithm:'
             return pred_labels

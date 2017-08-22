@@ -1,5 +1,8 @@
 ![SDLib](http://i2.muimg.com/1949/a23f0509950f23f1.png)
-
+</br>
+**Founder**: [@Coder-Yu ](https://github.com/Coder-Yu)</br>
+**Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian)<br>
+**Code Reviewer**: [@mingaoo](https://github.com/mingaoo)<br>
 SDLib: A Python library used to collect shilling detection methods. (for academic research)
 <h2>How to Run it</h2>
 <ul>
@@ -165,7 +168,7 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
 
   <tr>
 	<td scope="row">DegreeSAD</td>
-    <td>李文涛，等，一种基于流行度分类特征的托攻击检测算法， 自动化学报 (2015)<br></td>
+    <td> Wentao Li and Min Gao, Shilling Attack Detection in Recommender Systems via Selecting Patterns Analysis,IEICE Transactions on Information and System (2016)<br></td>
   </tr>
     <tr>
 	<td scope="row">PCASelectUsers</td>

@@ -1,51 +1,60 @@
 from baseclass.SDetection import SDetection
+from tool import config
 from sklearn.metrics import classification_report
 from sklearn import preprocessing
 import numpy as np
 from sklearn import metrics
+import scipy
+from scipy.sparse import csr_matrix
 
 
 class PCASelectUsers(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]', k=None, n=None ):
         super(PCASelectUsers, self).__init__(conf, trainingSet, testSet, labels, fold)
+
+
+    def readConfiguration(self):
+        super(PCASelectUsers, self).readConfiguration()
         # K = top-K vals of cov
-        self.k = 3
-        # n = attack size
-        self.n = 0.1
+        self.k = int(self.config['kVals'])
+        self.userNum = len(self.dao.trainingSet_u)
+        self.itemNum = len(self.dao.trainingSet_i)
+        if self.k >= min(self.userNum, self.itemNum):
+            self.k = 3
+            print '*** k-vals is more than the number of user or item, so it is set to', self.k
+
+        # n = attack size or the ratio of spammers to normal users
+        self.n = float(self.config['attackSize'])
+
 
     def buildModel(self):
         #array initialization
-        userNum = len(self.dao.trainingSet_u)
-        itemNum = len(self.dao.trainingSet_i)
-        dataArray = np.zeros([userNum, itemNum], dtype=float)
-        self.testLabels = np.zeros(userNum)
-        self.predLabels = np.zeros(userNum)
+        dataArray = np.zeros([self.userNum, self.itemNum], dtype=float)
+        self.trueLabels = np.zeros(self.userNum)
+        self.predLabels = np.zeros(self.userNum)
 
         #add data
+        print 'construct matrix'
         for user in self.dao.trainingSet_u:
             for item in self.dao.trainingSet_u[user].keys():
                 value = self.dao.trainingSet_u[user][item]
-                a = int(user) - 1
-                b = int(item) - 1
+                a = self.dao.user[user]
+                b = self.dao.item[item]
                 dataArray[a][b] = value
 
-        dataArray = preprocessing.scale(dataArray, axis=0)
-        dataArrayT = np.transpose(dataArray)
-        #cov
-        covArray = np.dot(dataArrayT, dataArray)
-        #eigen-value-decomposition
-        vals, vecs  = np.linalg.eig(covArray)
-        #top-K vals of cov
-        valsInd = np.argsort(vals)
-        valsInd = valsInd[-1:-(self.k + 1):-1]  #descend
-        #valsInd = valsInd[0:self.k:1]          #ascend
-        #use np.real() to get real parts
-        vecsInd = np.real(vecs[:, valsInd])
+        sMatrix = csr_matrix(dataArray)
+        # z-scores
+        sMatrix = preprocessing.scale(sMatrix, axis=0, with_mean=False)
+        sMT = np.transpose(sMatrix)
+        # cov
+        covSM = np.dot(sMT, sMatrix)
+        # eigen-value-decomposition
+        vals, vecs = scipy.sparse.linalg.eigs(covSM, k=self.k, which='LM')
 
-        newArray = np.dot(dataArray**2, np.real(vecsInd))
+        newArray = np.dot(dataArray**2, np.real(vecs))
 
         distanceDict = {}
-        userId = 1
+        userId = 0
         for user in newArray:
             distance = 0
             for tmp in user:
@@ -53,27 +62,28 @@ class PCASelectUsers(SDetection):
             distanceDict[userId] = float(distance)
             userId += 1
 
-        #predict spammer
-        disSort = sorted(distanceDict.iteritems(), key=lambda d: d[1], reverse=False)
-        spamList = []
-
-
-        i = 0
-        while i < self.n * len(disSort):
-            spam = disSort[i]
-            spamId = int(spam[0]-1)
-            spamList.append(spamId)
-            self.predLabels[spamId] = 1
-            i += 1
-
-        #trueLabels
-        for user in self.dao.trainingSet_u:
-            userInd = int(user) -1
-            self.testLabels[userInd] = self.labels[user]
+        print 'sort distance '
+        self.disSort = sorted(distanceDict.iteritems(), key=lambda d: d[1], reverse=False)
 
 
     def predict(self):
-        return self.testLabels
+        print 'predict spammer'
+        spamList = []
+        i = 0
+        while i < self.n * len(self.disSort):
+            spam = self.disSort[i][0]
+            spamList.append(spam)
+            self.predLabels[spam] = 1
+            i += 1
+
+        # trueLabels
+        for user in self.dao.trainingSet_u:
+            userInd = self.dao.user[user]
+            self.trueLabels[userInd] = int(self.labels[user])
+
+        print classification_report(self.trueLabels, self.predLabels, digits=4)
+        print metrics.confusion_matrix(self.trueLabels, self.predLabels)
+        return classification_report(self.trueLabels, self.predLabels, digits=4)
 
 
 
