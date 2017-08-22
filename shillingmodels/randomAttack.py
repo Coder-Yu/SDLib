@@ -19,7 +19,7 @@ class RandomAttack(Attack):
             #fill 装填项目
             fillerItems = self.getFillerItems()
             for item in fillerItems:
-                self.spamProfile[str(startUserID)][str(itemList[item])] = random.randint(1,6)
+                self.spamProfile[str(startUserID)][str(itemList[item])] = random.randint(self.minScore,self.maxScore)
 
             #target 目标项目
             for j in range(self.targetCount):

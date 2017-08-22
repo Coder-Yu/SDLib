@@ -23,7 +23,7 @@ class BandWagonAttack(Attack):
             #fill 装填项目
             fillerItems = self.getFillerItems()
             for item in fillerItems:
-                self.spamProfile[str(startUserID)][str(itemList[item])] = random.randint(1,6)
+                self.spamProfile[str(startUserID)][str(itemList[item])] = random.randint(self.minScore,self.maxScore)
             #selected 选择项目
             selectedItems = self.getSelectedItems()
             for item in selectedItems:

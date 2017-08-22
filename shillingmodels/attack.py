@@ -18,6 +18,8 @@ class Attack(object):
         self.threshold = float(self.config['threshold'])
         self.minCount = int(self.config['minCount'])
         self.maxCount = int(self.config['maxCount'])
+        self.minScore = float(self.config['minScore'])
+        self.maxScore = float(self.config['maxScore'])
         self.outputDir = self.config['outputDir']
         if not os.path.exists(self.outputDir):
             os.makedirs(self.outputDir)
