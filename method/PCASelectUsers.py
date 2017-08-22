@@ -30,7 +30,7 @@ class PCASelectUsers(SDetection):
     def buildModel(self):
         #array initialization
         dataArray = np.zeros([self.userNum, self.itemNum], dtype=float)
-        self.trueLabels = np.zeros(self.userNum)
+        self.testLabels = np.zeros(self.userNum)
         self.predLabels = np.zeros(self.userNum)
 
         #add data
@@ -79,11 +79,9 @@ class PCASelectUsers(SDetection):
         # trueLabels
         for user in self.dao.trainingSet_u:
             userInd = self.dao.user[user]
-            self.trueLabels[userInd] = int(self.labels[user])
+            self.testLabels[userInd] = int(self.labels[user])
 
-        print classification_report(self.trueLabels, self.predLabels, digits=4)
-        print metrics.confusion_matrix(self.trueLabels, self.predLabels)
-        return classification_report(self.trueLabels, self.predLabels, digits=4)
+        return self.predLabels
 
 
 
