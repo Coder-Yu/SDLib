@@ -1,9 +1,9 @@
 from averageAttack import AverageAttack
 from bandwagonAttack import BandWagonAttack
 from randomAttack import RandomAttack
-from rrAttack import RRAttack
+from RR_Attack import RR_Attack
 
-attack = RRAttack('./config/config.conf')
+attack = RR_Attack('./config/config.conf')
 attack.insertSpam()
 attack.farmLink()
 attack.generateLabels('labels.txt')

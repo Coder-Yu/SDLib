@@ -9,9 +9,10 @@ from os.path import abspath
 #
 # 双随机攻击
 #
-class RRAttack(RandomRelationAttack,RandomAttack):
+class RR_Attack(RandomRelationAttack,RandomAttack):
     def __init__(self,conf):
-        super(RRAttack, self).__init__(conf)
+        super(RR_Attack, self).__init__(conf)
+
 
 
 
