@@ -1,4 +1,4 @@
-from baseclass.SSDetection import SSDetection
+from baseclass.SDetection import SDetection
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 # from random import shuffle
@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 
-class DegreeSAD(SSDetection):
+class DegreeSAD(SDetection):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(DegreeSAD, self).__init__(conf, trainingSet, testSet, labels, fold)
 
