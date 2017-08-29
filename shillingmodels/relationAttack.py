@@ -50,4 +50,4 @@ class RelationAttack(Attack):
                 for u2 in self.spamLink[u1]:
                     relations.append(u1 + ' ' + u2 + ' 1\n')
             f.writelines(relations)
-        print 'User labels have been output to ' + abspath(self.config['outputDir']) + '.'
+        print 'Social relations have been output to ' + abspath(self.config['outputDir']) + '.'
