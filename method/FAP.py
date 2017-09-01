@@ -26,11 +26,11 @@ class FAP(SDetection):
 
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
-        # 0.5 is the ratio of spammer to dataset, it can be changed according to different
-        kThreshlod = int(0.5 * (len(self.dao.user) - self.s))
-        if self.k > kThreshlod:
-            self.k = kThreshlod
-            print '*** the number of top-K users is more than threshlod value, so it is set to', kThreshlod, '***'
+        # 0.5 is the ratio of spammer to dataset, it can be changed according to different datasets
+        kThreshold = int(0.5 * (len(self.dao.user) - self.s))
+        if self.k > kThreshold:
+            self.k = kThreshold
+            print '*** the number of top-K users is more than threshold value, so it is set to', kThreshold, '***'
     # product transition probability matrix self.TPUI and self.TPIU
 
     def __computeTProbability(self):
