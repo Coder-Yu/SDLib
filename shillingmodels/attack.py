@@ -32,6 +32,7 @@ class Attack(object):
         self.itemAverage = {}
         self.getAverageRating()
         self.selectTarget()
+        self.startUserID = 0
 
     # def selectTarget(count = 20):
     #     pass
@@ -68,7 +69,7 @@ class Attack(object):
         markedItems = np.random.randint(len(self.itemProfile), size=markedItemsCount)
         return markedItems.tolist()
 
-    def insertSpam(self):
+    def insertSpam(self,startID=0):
         pass
 
     def loadTarget(self,filename):
