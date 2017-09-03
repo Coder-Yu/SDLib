@@ -12,7 +12,7 @@ class SocialDAO(object):
         self.relation = relation
         self.followees = {}
         self.followers = {}
-        #self.trustMatrix = self.__generateSet()
+        self.trustMatrix = self.__generateSet()
 
     def __generateSet(self):
         #triple = []
