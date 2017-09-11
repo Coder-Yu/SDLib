@@ -187,6 +187,10 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
 	<td scope="row">FAP</td>
     <td>Zhang, Yongfeng, et al. "Catch the Black Sheep: Unified Framework for Shilling Attack Detection Based on Fraudulent Action Propagation." IJCAI (2015)<br></td>
   </tr>
+   <tr>
+	<td scope="row">CoDetector</td>
+    <td>Tong Dou, Junliang Yu et al. "Collaborative Shilling Detection bridging Factorization and User Embedding." COLLABORATECOM (2017)(Under Review)<br></td>
+  </tr>
   </table>
 </div>
 
