@@ -1,7 +1,7 @@
 ![SDLib](http://i2.muimg.com/1949/a23f0509950f23f1.png)
 </br>
 **Founder**: [@Coder-Yu ](https://github.com/Coder-Yu)</br>
-**Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian)<br>
+**Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian) [@DouTong](https://github.com/DouTong)<br>
 **Code Reviewer**: [@mingaoo](https://github.com/mingaoo)<br>
 SDLib: A Python library used to collect shilling detection methods. (for academic research)
 <h2>How to Run it</h2>
