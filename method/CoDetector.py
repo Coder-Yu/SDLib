@@ -130,9 +130,6 @@ class CoDetector(SDetection):
             iteration += 1
             print 'iteration:',iteration
 
-
-
-
         # preparing examples
         self.training = []
         self.trainingLabels = []
@@ -146,32 +143,14 @@ class CoDetector(SDetection):
             self.test.append(self.P[self.dao.all_User[user]])
             self.testLabels.append(self.labels[user])
 
-
-
     def predictRating(self,user,item):
         u = self.dao.all_User[user]
         i = self.dao.all_Item[item]
         return self.P[u].dot(self.Q[i])
-
-
 
     def predict(self):
         classifier =  DecisionTreeClassifier(criterion='entropy')
         classifier.fit(self.training, self.trainingLabels)
         pred_labels = classifier.predict(self.test)
         print 'Decision Tree:'
-        print classification_report(self.testLabels, pred_labels, digits=4)
-        return classification_report(self.testLabels, pred_labels, digits=4)
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return pred_labels
