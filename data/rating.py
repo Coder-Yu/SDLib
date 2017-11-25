@@ -72,11 +72,12 @@ class RatingDAO(object):
 
         self.all_User.update(self.user)
         self.all_Item.update(self.item)
+
         for i, user in enumerate(self.testData):
+            # order the user
+            if not self.user.has_key(user):
+                self.all_User[user] = len(self.all_User)
             for item in self.testData[user]:
-                # order the user
-                if not self.user.has_key(user):
-                    self.all_User[user] = len(self.all_User)
                 # order the item
                 if not self.item.has_key(item):
                     self.all_Item[item] = len(self.all_Item)
