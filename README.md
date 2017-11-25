@@ -189,7 +189,7 @@ SDLib: A Python library used to collect shilling detection methods. (for academi
   </tr>
    <tr>
 	<td scope="row">CoDetector</td>
-    <td>Tong Dou, Junliang Yu et al. "Collaborative Shilling Detection bridging Factorization and User Embedding." COLLABORATECOM (2017)(Under Review)<br></td>
+    <td>Tong Dou, Junliang Yu et al. "Collaborative Shilling Detection bridging Factorization and User Embedding." COLLABORATECOM (2017)<br></td>
   </tr>
   </table>
 </div>
