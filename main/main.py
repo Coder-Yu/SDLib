@@ -20,7 +20,7 @@ if __name__ == '__main__':
     conf = -1
     order = input('please enter the num of the method to run it:')
     import time
-    s = time.clock()
+    s = time.time()
     # if order == 0:
     #     try:
     #         import seaborn as sns
@@ -53,5 +53,5 @@ if __name__ == '__main__':
         exit(-1)
     sd = SDLib(conf)
     sd.execute()
-    e = time.clock()
+    e = time.time()
     print "Run time: %f s" % (e - s)

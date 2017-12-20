@@ -39,11 +39,11 @@ class BayesDetector(SDetection):
 
     def initModel(self):
         super(BayesDetector, self).initModel()
-        self.w = np.random.rand(len(self.dao.all_User)+1) / 20  # bias value of user
-        self.c = np.random.rand(len(self.dao.all_User)+1)/ 20  # bias value of context
-        self.G = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # context embedding
-        self.P = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # latent user matrix
-        self.Q = np.random.rand(len(self.dao.all_Item)+1, self.k) / 20  # latent item matrix
+        self.w = np.random.rand(len(self.dao.all_User)+1) / 5  # bias value of user
+        self.c = np.random.rand(len(self.dao.all_User)+1)/ 5  # bias value of context
+        self.G = np.random.rand(len(self.dao.all_User)+1, self.k) / 100  # context embedding
+        self.P = np.random.rand(len(self.dao.all_User)+1, self.k) / 100  # latent user matrix
+        self.Q = np.random.rand(len(self.dao.all_Item)+1, self.k) / 100  # latent item matrix
 
 
         # constructing SPPMI matrix
@@ -133,7 +133,7 @@ class BayesDetector(SDetection):
                     self.P[nu] -= self.lRate * (1 - s) * self.Q[i]
 
                     self.loss += -log(s)
-
+            #
             for user in self.dao.ratings:
                 for item in self.dao.ratings[user]:
                     rating = self.dao.ratings[user][item]
@@ -152,17 +152,18 @@ class BayesDetector(SDetection):
 
             for user in self.SPPMI:
                 u = self.dao.all_User[user]
+                p = self.P[u]
                 for context in self.SPPMI[user]:
                     v = self.dao.all_User[context]
                     m = self.SPPMI[user][context]
                     g = self.G[v]
-                    diff = (m - p.dot(g) - self.w[u] - self.c[v])
+                    diff = (m - p.dot(g))
                     self.loss += diff ** 2
                     # update latent vectors
                     self.P[u] += self.lRate * diff * g
                     self.G[v] += self.lRate * diff * p
-                    self.w[u] += self.lRate * diff
-                    self.c[v] += self.lRate * diff
+                    #self.w[u] += self.lRate * diff
+                    #self.c[v] += self.lRate * diff
             self.loss += self.regU * (self.P * self.P).sum() + self.regI * (self.Q * self.Q).sum()  + self.regR * (self.G * self.G).sum()
             iteration += 1
             print 'iteration:',iteration

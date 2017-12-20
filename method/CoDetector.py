@@ -115,6 +115,7 @@ class CoDetector(SDetection):
 
             for user in self.SPPMI:
                 u = self.dao.all_User[user]
+                p = self.P[u]
                 for context in self.SPPMI[user]:
                     v = self.dao.all_User[context]
                     m = self.SPPMI[user][context]
