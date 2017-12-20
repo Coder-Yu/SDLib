@@ -10,11 +10,11 @@ if __name__ == '__main__':
     print '   SDLib: A Python library used to collect shilling detection methods.'
     print '='*80
     print 'Supervised Methods:'
-    print '1. DegreeSAD   2.CoDetector\n'
+    print '1. DegreeSAD   2.CoDetector   3.BayesDetector\n'
     print 'Semi-Supervised Methods:'
-    print '3. SemiSAD\n'
+    print '4. SemiSAD\n'
     print 'Unsupervised Methods:'
-    print '4. PCASelectUsers    5. FAP\n'
+    print '5. PCASelectUsers    6. FAP\n'
     print '-'*80
     algor = -1
     conf = -1
@@ -37,12 +37,15 @@ if __name__ == '__main__':
         conf = Config('../config/CoDetector.conf')
 
     elif order == 3:
-        conf = Config('../config/SemiSAD.conf')
+        conf = Config('../config/BayesDetector.conf')
 
     elif order == 4:
-        conf = Config('../config/PCASelectUsers.conf')
+        conf = Config('../config/SemiSAD.conf')
 
     elif order == 5:
+        conf = Config('../config/PCASelectUsers.conf')
+
+    elif order == 6:
         conf = Config('../config/FAP.conf')
 
     else:
