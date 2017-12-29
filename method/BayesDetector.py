@@ -47,51 +47,51 @@ class BayesDetector(SDetection):
 
 
         # constructing SPPMI matrix
-        self.SPPMI = defaultdict(dict)
-        D = len(self.dao.user)
-        print 'Constructing SPPMI matrix...'
-        # for larger data set has many items, the process will be time consuming
-        occurrence = defaultdict(dict)
-        for user1 in self.dao.all_User:
-            iList1, rList1 = self.dao.allUserRated(user1)
-            if len(iList1) < self.filter:
-                continue
-            for user2 in self.dao.all_User:
-                if user1 == user2:
-                    continue
-                if not occurrence[user1].has_key(user2):
-                    iList2, rList2 = self.dao.allUserRated(user2)
-                    if len(iList2) < self.filter:
-                        continue
-                    count = len(set(iList1).intersection(set(iList2)))
-                    if count > self.filter:
-                        occurrence[user1][user2] = count
-                        occurrence[user2][user1] = count
-
-        maxVal = 0
-        frequency = {}
-        for user1 in occurrence:
-            frequency[user1] = sum(occurrence[user1].values()) * 1.0
-        D = sum(frequency.values()) * 1.0
-        # maxx = -1
-        for user1 in occurrence:
-            for user2 in occurrence[user1]:
-                try:
-                    val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
-                        self.negCount, 2), 0])
-                except ValueError:
-                    print self.SPPMI[user1][user2]
-                    print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
-                if val > 0:
-                    if maxVal < val:
-                        maxVal = val
-                    self.SPPMI[user1][user2] = val
-                    self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
-
-        # normalize
-        for user1 in self.SPPMI:
-            for user2 in self.SPPMI[user1]:
-                self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
+        # self.SPPMI = defaultdict(dict)
+        # D = len(self.dao.user)
+        # print 'Constructing SPPMI matrix...'
+        # # for larger data set has many items, the process will be time consuming
+        # occurrence = defaultdict(dict)
+        # for user1 in self.dao.all_User:
+        #     iList1, rList1 = self.dao.allUserRated(user1)
+        #     if len(iList1) < self.filter:
+        #         continue
+        #     for user2 in self.dao.all_User:
+        #         if user1 == user2:
+        #             continue
+        #         if not occurrence[user1].has_key(user2):
+        #             iList2, rList2 = self.dao.allUserRated(user2)
+        #             if len(iList2) < self.filter:
+        #                 continue
+        #             count = len(set(iList1).intersection(set(iList2)))
+        #             if count > self.filter:
+        #                 occurrence[user1][user2] = count
+        #                 occurrence[user2][user1] = count
+        #
+        # maxVal = 0
+        # frequency = {}
+        # for user1 in occurrence:
+        #     frequency[user1] = sum(occurrence[user1].values()) * 1.0
+        # D = sum(frequency.values()) * 1.0
+        # # maxx = -1
+        # for user1 in occurrence:
+        #     for user2 in occurrence[user1]:
+        #         try:
+        #             val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
+        #                 self.negCount, 2), 0])
+        #         except ValueError:
+        #             print self.SPPMI[user1][user2]
+        #             print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
+        #         if val > 0:
+        #             if maxVal < val:
+        #                 maxVal = val
+        #             self.SPPMI[user1][user2] = val
+        #             self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
+        #
+        # # normalize
+        # for user1 in self.SPPMI:
+        #     for user2 in self.SPPMI[user1]:
+        #         self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
 
     def buildModel(self):
         self.dao.ratings = dict(self.dao.trainingSet_u, **self.dao.testSet_u)
@@ -114,25 +114,25 @@ class BayesDetector(SDetection):
         while iteration < self.maxIter:
             self.loss = 0
 
-            for item in self.sSet:
-                i = self.dao.all_Item[item]
-                if not self.nSet.has_key(item):
-                    continue
-                normalUserList = self.nSet[item].keys()
-                for user in self.sSet[item]:
-                    su = self.dao.all_User[user]
-                    # if len(self.NegativeSet[user]) > 0:
-                    #     item_j = choice(self.NegativeSet[user])
-                    # else:
-                    normalUser = choice(normalUserList)
-                    nu = self.dao.all_User[normalUser]
-
-                    s = sigmoid(self.P[su].dot(self.Q[i]) - self.P[nu].dot(self.Q[i]))
-                    self.Q[i] += self.lRate * (1 - s) * (self.P[su] - self.P[nu])
-                    self.P[su] += self.lRate * (1 - s) * self.Q[i]
-                    self.P[nu] -= self.lRate * (1 - s) * self.Q[i]
-
-                    self.loss += -log(s)
+            # for item in self.sSet:
+            #     i = self.dao.all_Item[item]
+            #     if not self.nSet.has_key(item):
+            #         continue
+            #     normalUserList = self.nSet[item].keys()
+            #     for user in self.sSet[item]:
+            #         su = self.dao.all_User[user]
+            #         # if len(self.NegativeSet[user]) > 0:
+            #         #     item_j = choice(self.NegativeSet[user])
+            #         # else:
+            #         normalUser = choice(normalUserList)
+            #         nu = self.dao.all_User[normalUser]
+            #
+            #         s = sigmoid(self.P[su].dot(self.Q[i]) - self.P[nu].dot(self.Q[i]))
+            #         self.Q[i] += self.lRate * (1 - s) * (self.P[su] - self.P[nu])
+            #         self.P[su] += self.lRate * (1 - s) * self.Q[i]
+            #         self.P[nu] -= self.lRate * (1 - s) * self.Q[i]
+            #
+            #         self.loss += -log(s)
             #
             for user in self.dao.ratings:
                 for item in self.dao.ratings[user]:
@@ -150,20 +150,20 @@ class BayesDetector(SDetection):
                     self.Q[i] += self.lRate * (error * p - self.regI * q)
 
 
-            for user in self.SPPMI:
-                u = self.dao.all_User[user]
-                p = self.P[u]
-                for context in self.SPPMI[user]:
-                    v = self.dao.all_User[context]
-                    m = self.SPPMI[user][context]
-                    g = self.G[v]
-                    diff = (m - p.dot(g))
-                    self.loss += diff ** 2
-                    # update latent vectors
-                    self.P[u] += self.lRate * diff * g
-                    self.G[v] += self.lRate * diff * p
-                    #self.w[u] += self.lRate * diff
-                    #self.c[v] += self.lRate * diff
+            # for user in self.SPPMI:
+            #     u = self.dao.all_User[user]
+            #     p = self.P[u]
+            #     for context in self.SPPMI[user]:
+            #         v = self.dao.all_User[context]
+            #         m = self.SPPMI[user][context]
+            #         g = self.G[v]
+            #         diff = (m - p.dot(g))
+            #         self.loss += diff ** 2
+            #         # update latent vectors
+            #         self.P[u] += self.lRate * diff * g
+            #         self.G[v] += self.lRate * diff * p
+            #         #self.w[u] += self.lRate * diff
+            #         #self.c[v] += self.lRate * diff
             self.loss += self.regU * (self.P * self.P).sum() + self.regI * (self.Q * self.Q).sum()  + self.regR * (self.G * self.G).sum()
             iteration += 1
             print 'iteration:',iteration
