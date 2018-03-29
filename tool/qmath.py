@@ -59,7 +59,7 @@ def pearson_sp(x1,x2):
                 denom1 += (x1[k]-mean1) ** 2
                 denom2 += (x2[k]-mean2) ** 2
 
-            return (total + 0.0) / (sqrt(denom1) * sqrt(denom2))
+        return (total + 0.0) / (sqrt(denom1) * sqrt(denom2))
     except ZeroDivisionError:
         return 0
 
