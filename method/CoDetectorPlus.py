@@ -20,20 +20,21 @@ class CoDetectorPlus(SDetection):
         if self.negCount < 1:
             self.negCount = 1
 
-        self.regR = float(extraSettings['-gamma'])
+        self.gamma = float(extraSettings['-gamma'])
         self.filter = int(extraSettings['-filter'])
         learningRate = config.LineConfig(self.config['learnRate'])
         self.lRate = float(learningRate['-init'])
         self.maxLRate = float(learningRate['-max'])
         self.maxIter = int(self.config['num.max.iter'])
         self.beta = float(extraSettings['-beta'])
+        self.alpha = float(extraSettings['-alpha'])
         regular = config.LineConfig(self.config['reg.lambda'])
         self.regU, self.regI = float(regular['-u']), float(regular['-i'])
 
     def printAlgorConfig(self):
         super(CoDetectorPlus, self).printAlgorConfig()
         print 'k: %d' % self.negCount
-        print 'regR: %.5f' % self.regR
+        print 'gamma: %.5f' % self.gamma
         print 'filter: %d' % self.filter
         print '=' * 80
 
@@ -55,59 +56,62 @@ class CoDetectorPlus(SDetection):
             for item in self.dao.ratings[user]:
                 if self.dao.ratings[user][item]>4.0:
                     self.highRatings[user][item] = self.dao.ratings[user][item]
+                    #self.dao.ratings[user][item] =sigmoid(self.dao.ratings[user][item])
+
+
+
+        # print 'Constructing SPPMI matrix...'
+        # # for larger data set has many items, the process will be time consuming
         #
-        print 'Constructing SPPMI matrix...'
-        # for larger data set has many items, the process will be time consuming
-
-        occurrence = defaultdict(dict)
-        i=0
-        for user1 in self.highRatings:
-            iList1 = self.highRatings[user1].keys()
-
-            if len(iList1) < self.filter:
-                continue
-            for user2 in self.highRatings:
-                if user1 == user2:
-                    continue
-                if not occurrence[user1].has_key(user2):
-                    iList2 = self.highRatings[user2].keys()
-                    if len(iList2) < self.filter:
-                        continue
-                    count = len(set(iList1).intersection(set(iList2)))
-                    if count > self.filter:
-                        occurrence[user1][user2] = count
-                        occurrence[user2][user1] = count
-            i+=1
-            if i%200==0:
-                print i,'/',len(self.highRatings)
-        maxVal = 0
-        frequency = {}
-        for user1 in occurrence:
-            frequency[user1] = sum(occurrence[user1].values()) * 1.0
-        D = sum(frequency.values()) * 1.0
-        # maxx = -1
-        for user1 in occurrence:
-            for user2 in occurrence[user1]:
-                try:
-                    val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
-                        self.negCount, 2), 0])
-                except ValueError:
-                    print self.SPPMI[user1][user2]
-                    print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
-                if val > 0:
-                    if maxVal < val:
-                        maxVal = val
-                    self.SPPMI[user1][user2] = val
-                    self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
+        # occurrence = defaultdict(dict)
+        # i=0
+        # for user1 in self.highRatings:
+        #     iList1 = self.highRatings[user1].keys()
+        #
+        #     if len(iList1) < self.filter:
+        #         continue
+        #     for user2 in self.highRatings:
+        #         if user1 == user2:
+        #             continue
+        #         if not occurrence[user1].has_key(user2):
+        #             iList2 = self.highRatings[user2].keys()
+        #             if len(iList2) < self.filter:
+        #                 continue
+        #             count = len(set(iList1).intersection(set(iList2)))
+        #             if count > self.filter:
+        #                 occurrence[user1][user2] = count
+        #                 occurrence[user2][user1] = count
+        #     i+=1
+        #     if i%200==0:
+        #         print i,'/',len(self.highRatings)
+        # maxVal = 0
+        # frequency = {}
+        # for user1 in occurrence:
+        #     frequency[user1] = sum(occurrence[user1].values()) * 1.0
+        # D = sum(frequency.values()) * 1.0
+        # # maxx = -1
+        # for user1 in occurrence:
+        #     for user2 in occurrence[user1]:
+        #         try:
+        #             val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
+        #                 self.negCount, 2), 0])
+        #         except ValueError:
+        #             print self.SPPMI[user1][user2]
+        #             print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
+        #         if val > 0:
+        #             if maxVal < val:
+        #                 maxVal = val
+        #             self.SPPMI[user1][user2] = val
+        #             self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
         # normalize
-        for user1 in self.SPPMI:
-            for user2 in self.SPPMI[user1]:
-                self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
+        # for user1 in self.SPPMI:
+        #     for user2 in self.SPPMI[user1]:
+        #         self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
 
-        # import pickle
-        # # f=open('sppmi.mat','wb')
-        # # pickle.dump(self.SPPMI,f)
-        # #
+        import pickle
+        f=open('sppmi.mat','wb')
+        pickle.dump(self.SPPMI,f)
+        #
         # f=open('sppmi.mat','r')
         # self.SPPMI = pickle.load(f)
 
@@ -126,7 +130,7 @@ class CoDetectorPlus(SDetection):
                     continue
                 iList2 = self.highRatings[u2].keys()
                 common = len(s1.intersection(set(iList2)))
-                if common>5:
+                if common>3:
                     self.conspirator[u1][u2]=sigmoid(common)
 
 
@@ -141,15 +145,15 @@ class CoDetectorPlus(SDetection):
             for user in self.dao.ratings:
                 for item in self.dao.ratings[user]:
                     rating = self.dao.ratings[user][item]
-                    error = rating - self.predictRating(user,item)
+                    error = rating -self.predictRating(user,item)
                     u = self.dao.all_User[user]
                     i = self.dao.all_Item[item]
                     p = self.P[u]
                     q = self.Q[i]
-                    self.loss += error ** 2
+                    self.loss += self.alpha*error ** 2
                     # update latent vectors
-                    self.P[u] += self.lRate * (error * q - self.regU * p)
-                    self.Q[i] += self.lRate * (error * p - self.regI * q)
+                    self.P[u] += self.lRate * self.alpha*(error * q - self.regU * p)
+                    self.Q[i] += self.lRate * self.alpha*(error * p - self.regI * q)
 
             for user in self.SPPMI:
                 u = self.dao.all_User[user]
@@ -161,8 +165,8 @@ class CoDetectorPlus(SDetection):
                     diff = (m - p.dot(g))# - self.w[u] - self.c[v])
                     self.loss += diff ** 2
                     # update latent vectors
-                    self.P[u] += self.lRate * diff * g
-                    self.G[v] += self.lRate * diff * p
+                    self.P[u] += self.lRate * self.gamma* diff * g
+                    self.G[v] += self.lRate * self.gamma* diff * p
                     # self.w[u] += self.lRate * diff
                     # self.c[v] += self.lRate * diff
 
@@ -187,7 +191,7 @@ class CoDetectorPlus(SDetection):
                 self.P[u] -= self.lRate * self.beta * matesLoss
 
             self.loss += self.regU * (self.P * self.P).sum() + self.regI * (self.Q * self.Q).sum()  + \
-                         self.regR * (self.G * self.G).sum()
+                         self.regU * (self.G * self.G).sum()
 
 
 
