@@ -52,14 +52,14 @@ class CoDetector(SDetection):
         # for larger data set has many items, the process will be time consuming
         occurrence = defaultdict(dict)
         for user1 in self.dao.all_User:
-            iList1, rList1 = self.dao.allUserRated(user1)
+            iList1, rList1 = self.dao.userRated(user1)
             if len(iList1) < self.filter:
                 continue
             for user2 in self.dao.all_User:
                 if user1 == user2:
                     continue
                 if not occurrence[user1].has_key(user2):
-                    iList2, rList2 = self.dao.allUserRated(user2)
+                    iList2, rList2 = self.dao.userRated(user2)
                     if len(iList2) < self.filter:
                         continue
                     count = len(set(iList1).intersection(set(iList2)))
