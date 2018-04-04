@@ -46,7 +46,7 @@ class CoDetectorPlus(SDetection):
         self.Q = np.random.rand(len(self.dao.all_Item)+1, self.k) / 20  # latent item matrix
 
         # constructing SPPMI matrix
-        # self.SPPMI = defaultdict(dict)
+        self.SPPMI = defaultdict(dict)
         #
         # #filter low ratings
         self.highRatings = defaultdict(dict)
@@ -56,60 +56,60 @@ class CoDetectorPlus(SDetection):
                 if self.dao.ratings[user][item]>4.0:
                     self.highRatings[user][item] = self.dao.ratings[user][item]
         #
-        # print 'Constructing SPPMI matrix...'
-        # # for larger data set has many items, the process will be time consuming
-        #
-        # occurrence = defaultdict(dict)
-        # i=0
-        # for user1 in self.highRatings:
-        #     iList1 = self.highRatings[user1].keys()
-        #
-        #     if len(iList1) < self.filter:
-        #         continue
-        #     for user2 in self.highRatings:
-        #         if user1 == user2:
-        #             continue
-        #         if not occurrence[user1].has_key(user2):
-        #             iList2 = self.highRatings[user2].keys()
-        #             if len(iList2) < self.filter:
-        #                 continue
-        #             count = len(set(iList1).intersection(set(iList2)))
-        #             if count > self.filter:
-        #                 occurrence[user1][user2] = count
-        #                 occurrence[user2][user1] = count
-        #     i+=1
-        #     if i%200==0:
-        #         print i,'/',len(self.highRatings)
-        # maxVal = 0
-        # frequency = {}
-        # for user1 in occurrence:
-        #     frequency[user1] = sum(occurrence[user1].values()) * 1.0
-        # D = sum(frequency.values()) * 1.0
-        # # maxx = -1
-        # for user1 in occurrence:
-        #     for user2 in occurrence[user1]:
-        #         try:
-        #             val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
-        #                 self.negCount, 2), 0])
-        #         except ValueError:
-        #             print self.SPPMI[user1][user2]
-        #             print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
-        #         if val > 0:
-        #             if maxVal < val:
-        #                 maxVal = val
-        #             self.SPPMI[user1][user2] = val
-        #             self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
-        # # normalize
-        # for user1 in self.SPPMI:
-        #     for user2 in self.SPPMI[user1]:
-        #         self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
+        print 'Constructing SPPMI matrix...'
+        # for larger data set has many items, the process will be time consuming
 
-        import pickle
-        # f=open('sppmi.mat','wb')
-        # pickle.dump(self.SPPMI,f)
-        #
-        f=open('sppmi.mat','r')
-        self.SPPMI = pickle.load(f)
+        occurrence = defaultdict(dict)
+        i=0
+        for user1 in self.highRatings:
+            iList1 = self.highRatings[user1].keys()
+
+            if len(iList1) < self.filter:
+                continue
+            for user2 in self.highRatings:
+                if user1 == user2:
+                    continue
+                if not occurrence[user1].has_key(user2):
+                    iList2 = self.highRatings[user2].keys()
+                    if len(iList2) < self.filter:
+                        continue
+                    count = len(set(iList1).intersection(set(iList2)))
+                    if count > self.filter:
+                        occurrence[user1][user2] = count
+                        occurrence[user2][user1] = count
+            i+=1
+            if i%200==0:
+                print i,'/',len(self.highRatings)
+        maxVal = 0
+        frequency = {}
+        for user1 in occurrence:
+            frequency[user1] = sum(occurrence[user1].values()) * 1.0
+        D = sum(frequency.values()) * 1.0
+        # maxx = -1
+        for user1 in occurrence:
+            for user2 in occurrence[user1]:
+                try:
+                    val = max([log(occurrence[user1][user2] * D / (frequency[user1] * frequency[user2]), 2) - log(
+                        self.negCount, 2), 0])
+                except ValueError:
+                    print self.SPPMI[user1][user2]
+                    print self.SPPMI[user1][user2] * D / (frequency[user1] * frequency[user2])
+                if val > 0:
+                    if maxVal < val:
+                        maxVal = val
+                    self.SPPMI[user1][user2] = val
+                    self.SPPMI[user2][user1] = self.SPPMI[user1][user2]
+        # normalize
+        for user1 in self.SPPMI:
+            for user2 in self.SPPMI[user1]:
+                self.SPPMI[user1][user2] = self.SPPMI[user1][user2] / maxVal
+
+        # import pickle
+        # # f=open('sppmi.mat','wb')
+        # # pickle.dump(self.SPPMI,f)
+        # #
+        # f=open('sppmi.mat','r')
+        # self.SPPMI = pickle.load(f)
 
         #group analysis
         self.conspirator = defaultdict(dict)
