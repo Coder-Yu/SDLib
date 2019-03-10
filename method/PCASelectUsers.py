@@ -1,4 +1,4 @@
-from baseclass.SDetection import SDetection
+from baseclass.detector import Detector
 from tool import config
 from sklearn.metrics import classification_report
 from sklearn import preprocessing
@@ -8,7 +8,7 @@ import scipy
 from scipy.sparse import csr_matrix
 
 
-class PCASelectUsers(SDetection):
+class PCASelectUsers(Detector):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]', k=None, n=None ):
         super(PCASelectUsers, self).__init__(conf, trainingSet, testSet, labels, fold)
 
@@ -17,8 +17,8 @@ class PCASelectUsers(SDetection):
         super(PCASelectUsers, self).readConfiguration()
         # K = top-K vals of cov
         self.k = int(self.config['kVals'])
-        self.userNum = len(self.dao.trainingSet_u)
-        self.itemNum = len(self.dao.trainingSet_i)
+        self.userNum = len(self.data.trainingSet_u)
+        self.itemNum = len(self.data.trainingSet_i)
         if self.k >= min(self.userNum, self.itemNum):
             self.k = 3
             print '*** k-vals is more than the number of user or item, so it is set to', self.k
@@ -35,11 +35,11 @@ class PCASelectUsers(SDetection):
 
         #add data
         print 'construct matrix'
-        for user in self.dao.trainingSet_u:
-            for item in self.dao.trainingSet_u[user].keys():
-                value = self.dao.trainingSet_u[user][item]
-                a = self.dao.user[user]
-                b = self.dao.item[item]
+        for user in self.data.trainingSet_u:
+            for item in self.data.trainingSet_u[user].keys():
+                value = self.data.trainingSet_u[user][item]
+                a = self.data.user[user]
+                b = self.data.item[item]
                 dataArray[a][b] = value
 
         sMatrix = csr_matrix(dataArray)
@@ -77,8 +77,8 @@ class PCASelectUsers(SDetection):
             i += 1
 
         # trueLabels
-        for user in self.dao.trainingSet_u:
-            userInd = self.dao.user[user]
+        for user in self.data.trainingSet_u:
+            userInd = self.data.user[user]
             self.testLabels[userInd] = int(self.labels[user])
 
         return self.predLabels

@@ -1,4 +1,4 @@
-from baseclass.SDetection import SDetection
+from baseclass.detector import Detector
 from sklearn.metrics import classification_report
 import numpy as np
 from tool import config
@@ -7,7 +7,7 @@ from math import log,exp
 from sklearn.tree import DecisionTreeClassifier
 
 #CoDetector: Collaborative Shilling Detection Bridging Factorization and User Embedding
-class CoDetector(SDetection):
+class CoDetector(Detector):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(CoDetector, self).__init__(conf, trainingSet, testSet, labels, fold)
 
@@ -38,28 +38,28 @@ class CoDetector(SDetection):
 
     def initModel(self):
         super(CoDetector, self).initModel()
-        self.w = np.random.rand(len(self.dao.all_User)+1) / 20  # bias value of user
-        self.c = np.random.rand(len(self.dao.all_User)+1)/ 20  # bias value of context
-        self.G = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # context embedding
-        self.P = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # latent user matrix
-        self.Q = np.random.rand(len(self.dao.all_Item)+1, self.k) / 20  # latent item matrix
+        self.w = np.random.rand(len(self.data.all_User)+1) / 20  # bias value of user
+        self.c = np.random.rand(len(self.data.all_User)+1)/ 20  # bias value of context
+        self.G = np.random.rand(len(self.data.all_User)+1, self.k) / 20  # context embedding
+        self.P = np.random.rand(len(self.data.all_User)+1, self.k) / 20  # latent user matrix
+        self.Q = np.random.rand(len(self.data.all_Item)+1, self.k) / 20  # latent item matrix
 
 
         # constructing SPPMI matrix
         self.SPPMI = defaultdict(dict)
-        D = len(self.dao.user)
+        D = len(self.data.user)
         print 'Constructing SPPMI matrix...'
         # for larger data set has many items, the process will be time consuming
         occurrence = defaultdict(dict)
-        for user1 in self.dao.all_User:
-            iList1, rList1 = self.dao.userRated(user1)
+        for user1 in self.data.all_User:
+            iList1, rList1 = self.data.userRated(user1)
             if len(iList1) < self.filter:
                 continue
-            for user2 in self.dao.all_User:
+            for user2 in self.data.all_User:
                 if user1 == user2:
                     continue
                 if not occurrence[user1].has_key(user2):
-                    iList2, rList2 = self.dao.userRated(user2)
+                    iList2, rList2 = self.data.userRated(user2)
                     if len(iList2) < self.filter:
                         continue
                     count = len(set(iList1).intersection(set(iList2)))
@@ -98,13 +98,13 @@ class CoDetector(SDetection):
         while iteration < self.maxIter:
             self.loss = 0
 
-            self.dao.ratings = dict(self.dao.trainingSet_u, **self.dao.testSet_u)
-            for user in self.dao.ratings:
-                for item in self.dao.ratings[user]:
-                    rating = self.dao.ratings[user][item]
+            self.data.ratings = dict(self.data.trainingSet_u, **self.data.testSet_u)
+            for user in self.data.ratings:
+                for item in self.data.ratings[user]:
+                    rating = self.data.ratings[user][item]
                     error = rating - self.predictRating(user,item)
-                    u = self.dao.all_User[user]
-                    i = self.dao.all_Item[item]
+                    u = self.data.all_User[user]
+                    i = self.data.all_Item[item]
                     p = self.P[u]
                     q = self.Q[i]
                     self.loss += error ** 2
@@ -114,10 +114,10 @@ class CoDetector(SDetection):
 
 
             for user in self.SPPMI:
-                u = self.dao.all_User[user]
+                u = self.data.all_User[user]
                 p = self.P[u]
                 for context in self.SPPMI[user]:
-                    v = self.dao.all_User[context]
+                    v = self.data.all_User[context]
                     m = self.SPPMI[user][context]
                     g = self.G[v]
                     diff = (m - p.dot(g) - self.w[u] - self.c[v])
@@ -137,16 +137,16 @@ class CoDetector(SDetection):
         self.test = []
         self.testLabels = []
 
-        for user in self.dao.trainingSet_u:
-            self.training.append(self.P[self.dao.all_User[user]])
+        for user in self.data.trainingSet_u:
+            self.training.append(self.P[self.data.all_User[user]])
             self.trainingLabels.append(self.labels[user])
-        for user in self.dao.testSet_u:
-            self.test.append(self.P[self.dao.all_User[user]])
+        for user in self.data.testSet_u:
+            self.test.append(self.P[self.data.all_User[user]])
             self.testLabels.append(self.labels[user])
 
     def predictRating(self,user,item):
-        u = self.dao.all_User[user]
-        i = self.dao.all_Item[item]
+        u = self.data.all_User[user]
+        i = self.data.all_Item[item]
         return self.P[u].dot(self.Q[i])
 
     def predict(self):

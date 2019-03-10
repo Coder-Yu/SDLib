@@ -7,13 +7,13 @@ import os.path
 from re import split
 from collections import defaultdict
 
-class RatingDAO(object):
+class Rating(object):
     'data access control'
     def __init__(self,config, trainingData, testData):
         self.config = config
         self.ratingConfig = LineConfig(config['ratings.setup'])
-        self.user = {} #used to store the order of users in the training set
-        self.item = {} #used to store the order of items in the training set
+        self.user = {} #used to store the id of users in the training set
+        self.item = {} #used to store the id of items in the training set
         self.id2user = {}
         self.id2item = {}
         self.all_Item = {}
@@ -175,37 +175,4 @@ class RatingDAO(object):
         #     return self.testSet_u[u].keys(), self.testSet_u[u].values()
         else:
             return [],[]
-    # def userRated(self,u):
-    #     if self.trainingMatrix.matrix_User.has_key(self.getUserId(u)):
-    #         itemIndex =  self.trainingMatrix.matrix_User[self.user[u]].keys()
-    #         rating = self.trainingMatrix.matrix_User[self.user[u]].values()
-    #         return (itemIndex,rating)
-    #     return ([],[])
-    #
-    # def itemRated(self,i):
-    #     if self.trainingMatrix.matrix_Item.has_key(self.getItemId(i)):
-    #         userIndex = self.trainingMatrix.matrix_Item[self.item[i]].keys()
-    #         rating = self.trainingMatrix.matrix_Item[self.item[i]].values()
-    #         return (userIndex,rating)
-    #     return ([],[])
 
-    # def row(self,u):
-    #     return self.trainingMatrix.row(self.getUserId(u))
-    #
-    # def col(self,c):
-    #     return self.trainingMatrix.col(self.getItemId(c))
-    #
-    # def sRow(self,u):
-    #     return self.trainingMatrix.sRow(self.getUserId(u))
-    #
-    # def sCol(self,c):
-    #     return self.trainingMatrix.sCol(self.getItemId(c))
-    #
-    # def rating(self,u,c):
-    #     return self.trainingMatrix.elem(self.getUserId(u),self.getItemId(c))
-    #
-    # def ratingScale(self):
-    #     return (self.rScale[0],self.rScale[1])
-
-    # def elemCount(self):
-    #     return self.trainingMatrix.elemCount()

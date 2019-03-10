@@ -44,7 +44,7 @@ class Attack(object):
     def getAverageRating(self):
         for itemID in self.itemProfile:
             li = self.itemProfile[itemID].values()
-            self.itemAverage[itemID] = float(sum(li)) / len(li)
+            self.itemAverage[itemID] = float(sum(li)) / len(li+.0)
 
 
     def selectTarget(self,):
@@ -54,7 +54,7 @@ class Attack(object):
         itemList = self.itemProfile.keys()
         itemList.sort()
         while len(self.targetItems) < self.targetCount:
-            target = np.random.randint(len(itemList)) #generate a target order at random
+            target = np.random.randint(len(itemList)) #generate a target at random
 
             if len(self.itemProfile[str(itemList[target])]) < self.maxCount and len(self.itemProfile[str(itemList[target])]) > self.minCount \
                     and str(itemList[target]) not in self.targetItems \

@@ -1,4 +1,4 @@
-from baseclass.SDetection import SDetection
+from baseclass.detector import Detector
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 # from random import shuffle
@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 
-class DegreeSAD(SDetection):
+class DegreeSAD(Detector):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(DegreeSAD, self).__init__(conf, trainingSet, testSet, labels, fold)
 
@@ -15,42 +15,42 @@ class DegreeSAD(SDetection):
         self.RUD = {}
         self.QUD = {}
         # computing MUD,RUD,QUD for training set
-        sList = sorted(self.dao.trainingSet_i.iteritems(), key=lambda d: len(d[1]), reverse=True)
+        sList = sorted(self.data.trainingSet_i.iteritems(), key=lambda d: len(d[1]), reverse=True)
         maxLength = len(sList[0][1])
-        for user in self.dao.trainingSet_u:
+        for user in self.data.trainingSet_u:
             self.MUD[user] = 0
-            for item in self.dao.trainingSet_u[user]:
-                self.MUD[user] += len(self.dao.trainingSet_i[item]) #/ float(maxLength)
-            self.MUD[user]/float(len(self.dao.trainingSet_u[user]))
-            lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.trainingSet_u[user]]
+            for item in self.data.trainingSet_u[user]:
+                self.MUD[user] += len(self.data.trainingSet_i[item]) #/ float(maxLength)
+            self.MUD[user]/float(len(self.data.trainingSet_u[user]))
+            lengthList = [len(self.data.trainingSet_i[item]) for item in self.data.trainingSet_u[user]]
             lengthList.sort(reverse=True)
             self.RUD[user] = lengthList[0] - lengthList[-1]
 
-            lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.trainingSet_u[user]]
+            lengthList = [len(self.data.trainingSet_i[item]) for item in self.data.trainingSet_u[user]]
             lengthList.sort()
             self.QUD[user] = lengthList[int((len(lengthList) - 1) / 4.0)]
 
         # computing MUD,RUD,QUD for test set
-        for user in self.dao.testSet_u:
+        for user in self.data.testSet_u:
             self.MUD[user] = 0
-            for item in self.dao.testSet_u[user]:
-                self.MUD[user] += len(self.dao.trainingSet_i[item]) #/ float(maxLength)
-        for user in self.dao.testSet_u:
-            lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.testSet_u[user]]
+            for item in self.data.testSet_u[user]:
+                self.MUD[user] += len(self.data.trainingSet_i[item]) #/ float(maxLength)
+        for user in self.data.testSet_u:
+            lengthList = [len(self.data.trainingSet_i[item]) for item in self.data.testSet_u[user]]
             lengthList.sort(reverse=True)
             self.RUD[user] = lengthList[0] - lengthList[-1]
-        for user in self.dao.testSet_u:
-            lengthList = [len(self.dao.trainingSet_i[item]) for item in self.dao.testSet_u[user]]
+        for user in self.data.testSet_u:
+            lengthList = [len(self.data.trainingSet_i[item]) for item in self.data.testSet_u[user]]
             lengthList.sort()
             self.QUD[user] = lengthList[int((len(lengthList) - 1) / 4.0)]
 
         # preparing examples
 
-        for user in self.dao.trainingSet_u:
+        for user in self.data.trainingSet_u:
             self.training.append([self.MUD[user], self.RUD[user], self.QUD[user]])
             self.trainingLabels.append(self.labels[user])
 
-        for user in self.dao.testSet_u:
+        for user in self.data.testSet_u:
             self.test.append([self.MUD[user], self.RUD[user], self.QUD[user]])
             self.testLabels.append(self.labels[user])
 

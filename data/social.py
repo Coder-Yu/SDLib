@@ -5,7 +5,7 @@ from tool.qmath import normalize
 import os.path
 from re import split
 
-class SocialDAO(object):
+class Social(object):
     def __init__(self,conf,relation=list()):
         self.config = conf
         self.user = {} #used to store the order of users

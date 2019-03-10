@@ -1,11 +1,11 @@
-from baseclass.SDetection import SDetection
+from baseclass.detector import Detector
 from tool import config
 from sklearn.metrics import classification_report
 import numpy as np
 import random
 from sklearn import metrics
 
-class FAP(SDetection):
+class FAP(Detector):
 
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(FAP, self).__init__(conf, trainingSet, testSet, labels, fold)
@@ -16,9 +16,9 @@ class FAP(SDetection):
         self.s =int( self.config['seedUser'])
         # preserve the real spammer ID
         self.spammer = []
-        for i in self.dao.user:
+        for i in self.data.user:
             if self.labels[i] == '1':
-                self.spammer.append(self.dao.user[i])
+                self.spammer.append(self.data.user[i])
         sThreshold = int(0.5 * len(self.spammer))
         if self.s > sThreshold :
             self.s = sThreshold
@@ -27,7 +27,7 @@ class FAP(SDetection):
         # # predict top-k user as spammer
         self.k = int(self.config['topKSpam'])
         # 0.5 is the ratio of spammer to dataset, it can be changed according to different datasets
-        kThreshold = int(0.5 * (len(self.dao.user) - self.s))
+        kThreshold = int(0.5 * (len(self.data.user) - self.s))
         if self.k > kThreshold:
             self.k = kThreshold
             print '*** the number of top-K users is more than threshold value, so it is set to', kThreshold, '***'
@@ -35,16 +35,16 @@ class FAP(SDetection):
 
     def __computeTProbability(self):
         # m--user count; n--item count
-        m, n, tmp = self.dao.trainingSize()
+        m, n, tmp = self.data.trainingSize()
         self.TPUI = np.zeros((m, n))
         self.TPIU = np.zeros((n, m))
 
         self.userUserIdDic = {}
         self.itemItemIdDic = {}
-        tmpUser = self.dao.user.values()
-        tmpUserId = self.dao.user.keys()
-        tmpItem = self.dao.item.values()
-        tmpItemId = self.dao.item.keys()
+        tmpUser = self.data.user.values()
+        tmpUserId = self.data.user.keys()
+        tmpItem = self.data.item.values()
+        tmpItemId = self.data.item.keys()
         for users in range(0, m):
             self.userUserIdDic[tmpUser[users]] = tmpUserId[users]
         for items in range(0, n):
@@ -63,7 +63,7 @@ class FAP(SDetection):
                     otherUserW = 0
                     for otherItem in self.bipartiteGraphUI[user]:
                         otherItemW += float(self.bipartiteGraphUI[user][otherItem])
-                    for otherUser in self.dao.trainingSet_i[item]:
+                    for otherUser in self.data.trainingSet_i[item]:
                         otherUserW += float(self.bipartiteGraphUI[otherUser][item])
                     # wPrime = w*1.0/(otherUserW * otherItemW)
                     wPrime = w
@@ -76,14 +76,14 @@ class FAP(SDetection):
         # construction of the bipartite graph
         print "constructing bipartite graph..."
         self.bipartiteGraphUI = {}
-        for user in self.dao.trainingSet_u:
+        for user in self.data.trainingSet_u:
             tmpUserItemDic = {}  # user-item-point
-            for item in self.dao.trainingSet_u[user]:
+            for item in self.data.trainingSet_u[user]:
                 # tmpItemUserDic = {}#item-user-point
-                recordValue = float(self.dao.trainingSet_u[user][item])
-                w = 1 + abs((recordValue - self.dao.userMeans[user]) / self.dao.userMeans[user]) + abs(
-                    (recordValue - self.dao.itemMeans[item]) / self.dao.itemMeans[item]) + abs(
-                    (recordValue - self.dao.globalMean) / self.dao.globalMean)
+                recordValue = float(self.data.trainingSet_u[user][item])
+                w = 1 + abs((recordValue - self.data.userMeans[user]) / self.data.userMeans[user]) + abs(
+                    (recordValue - self.data.itemMeans[item]) / self.data.itemMeans[item]) + abs(
+                    (recordValue - self.data.globalMean) / self.data.globalMean)
                 # tmpItemUserDic[user] = w
                 tmpUserItemDic[item] = w
             # self.bipartiteGraphIU[item] = tmpItemUserDic
@@ -102,7 +102,7 @@ class FAP(SDetection):
 
     def buildModel(self):
         # -------init--------
-        m, n, tmp = self.dao.trainingSize()
+        m, n, tmp = self.data.trainingSize()
         PUser = np.zeros(m)
         PItem = np.zeros(n)
         self.testLabels = [0 for i in range(m)]
@@ -165,8 +165,8 @@ class FAP(SDetection):
             sIndex += 1
 
         # trueLabels
-        for user in self.dao.trainingSet_u:
-            userInd = self.dao.user[user]
+        for user in self.data.trainingSet_u:
+            userInd = self.data.user[user]
             # print type(user), user, userInd
             self.testLabels[userInd] = int(self.labels[user])
 

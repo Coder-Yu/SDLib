@@ -1,4 +1,4 @@
-from baseclass.SDetection import SDetection
+from baseclass.detector import Detector
 from sklearn.metrics import classification_report
 import numpy as np
 from tool import config
@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from math import exp
 from tool.qmath import sigmoid
 #CoDetectorPlus: Collaborative Shilling Detection Bridging Factorization and User Embedding
-class CoDetectorPlus(SDetection):
+class CoDetectorPlus(Detector):
     def __init__(self, conf, trainingSet=None, testSet=None, labels=None, fold='[1]'):
         super(CoDetectorPlus, self).__init__(conf, trainingSet, testSet, labels, fold)
 
@@ -40,23 +40,23 @@ class CoDetectorPlus(SDetection):
 
     def initModel(self):
         super(CoDetectorPlus, self).initModel()
-        self.w = np.random.rand(len(self.dao.all_User)+1) / 20  # bias value of user
-        self.c = np.random.rand(len(self.dao.all_User)+1)/ 20  # bias value of context
-        self.G = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # context embedding
-        self.P = np.random.rand(len(self.dao.all_User)+1, self.k) / 20  # latent user matrix
-        self.Q = np.random.rand(len(self.dao.all_Item)+1, self.k) / 20  # latent item matrix
+        self.w = np.random.rand(len(self.data.all_User)+1) / 20  # bias value of user
+        self.c = np.random.rand(len(self.data.all_User)+1)/ 20  # bias value of context
+        self.G = np.random.rand(len(self.data.all_User)+1, self.k) / 20  # context embedding
+        self.P = np.random.rand(len(self.data.all_User)+1, self.k) / 20  # latent user matrix
+        self.Q = np.random.rand(len(self.data.all_Item)+1, self.k) / 20  # latent item matrix
 
         # constructing SPPMI matrix
         self.SPPMI = defaultdict(dict)
         #
         # #filter low ratings
         self.highRatings = defaultdict(dict)
-        self.dao.ratings = dict(self.dao.trainingSet_u, **self.dao.testSet_u)
-        for user in self.dao.ratings:
-            for item in self.dao.ratings[user]:
-                if self.dao.ratings[user][item]>4.0:
-                    self.highRatings[user][item] = self.dao.ratings[user][item]
-                    #self.dao.ratings[user][item] =sigmoid(self.dao.ratings[user][item])
+        self.data.ratings = dict(self.data.trainingSet_u, **self.data.testSet_u)
+        for user in self.data.ratings:
+            for item in self.data.ratings[user]:
+                if self.data.ratings[user][item]>4.0:
+                    self.highRatings[user][item] = self.data.ratings[user][item]
+                    #self.data.ratings[user][item] =sigmoid(self.data.ratings[user][item])
 
 
 
@@ -119,14 +119,14 @@ class CoDetectorPlus(SDetection):
         self.conspirator = defaultdict(dict)
 
         for u1 in self.highRatings:
-            if self.labels[u1]=='0' or not self.dao.trainingSet_u.has_key(u1):
+            if self.labels[u1]=='0' or not self.data.trainingSet_u.has_key(u1):
                 continue
             iList1 = self.highRatings[u1].keys()
             s1= set(iList1)
             for u2 in self.highRatings:
                 if u1==u2:
                     continue
-                if self.labels[u2]=='0' or not self.dao.trainingSet_u.has_key(u2):
+                if self.labels[u2]=='0' or not self.data.trainingSet_u.has_key(u2):
                     continue
                 iList2 = self.highRatings[u2].keys()
                 common = len(s1.intersection(set(iList2)))
@@ -141,13 +141,13 @@ class CoDetectorPlus(SDetection):
         iteration = 0
         while iteration < self.maxIter:
             self.loss = 0
-            self.dao.ratings = dict(self.dao.trainingSet_u, **self.dao.testSet_u)
-            for user in self.dao.ratings:
-                for item in self.dao.ratings[user]:
-                    rating = self.dao.ratings[user][item]
+            self.data.ratings = dict(self.data.trainingSet_u, **self.data.testSet_u)
+            for user in self.data.ratings:
+                for item in self.data.ratings[user]:
+                    rating = self.data.ratings[user][item]
                     error = rating -self.predictRating(user,item)
-                    u = self.dao.all_User[user]
-                    i = self.dao.all_Item[item]
+                    u = self.data.all_User[user]
+                    i = self.data.all_Item[item]
                     p = self.P[u]
                     q = self.Q[i]
                     self.loss += self.alpha*error ** 2
@@ -156,10 +156,10 @@ class CoDetectorPlus(SDetection):
                     self.Q[i] += self.lRate * self.alpha*(error * p - self.regI * q)
 
             for user in self.SPPMI:
-                u = self.dao.all_User[user]
+                u = self.data.all_User[user]
                 p = self.P[u]
                 for context in self.SPPMI[user]:
-                    v = self.dao.all_User[context]
+                    v = self.data.all_User[context]
                     m = self.SPPMI[user][context]
                     g = self.G[v]
                     diff = (m - p.dot(g))# - self.w[u] - self.c[v])
@@ -174,12 +174,12 @@ class CoDetectorPlus(SDetection):
             for user in self.conspirator:
                 fPred = 0
                 denom = 0
-                u = self.dao.all_User[user]
+                u = self.data.all_User[user]
                 p = self.P[u]
                 mates = self.conspirator[user].keys()
                 for mate in mates:
                     weight= self.conspirator[user][mate]
-                    uf = self.dao.all_User[mate]
+                    uf = self.data.all_User[mate]
                     fPred += weight * self.P[uf]
                     denom += weight
                 if denom <> 0:
@@ -204,16 +204,16 @@ class CoDetectorPlus(SDetection):
         self.test = []
         self.testLabels = []
 
-        for user in self.dao.trainingSet_u:
-            self.training.append(self.P[self.dao.all_User[user]])
+        for user in self.data.trainingSet_u:
+            self.training.append(self.P[self.data.all_User[user]])
             self.trainingLabels.append(self.labels[user])
-        for user in self.dao.testSet_u:
-            self.test.append(self.P[self.dao.all_User[user]])
+        for user in self.data.testSet_u:
+            self.test.append(self.P[self.data.all_User[user]])
             self.testLabels.append(self.labels[user])
 
     def predictRating(self,user,item):
-        u = self.dao.all_User[user]
-        i = self.dao.all_Item[item]
+        u = self.data.all_User[user]
+        i = self.data.all_Item[item]
         return self.P[u].dot(self.Q[i])
 
     def predict(self):
