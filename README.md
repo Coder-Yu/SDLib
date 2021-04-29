@@ -1,5 +1,5 @@
 <h1>SDLib</h1>
-<br>
+
 **Founder**: [@Coder-Yu ](https://github.com/Coder-Yu)</br>
 **Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian) [@DouTong](https://github.com/DouTong)<br>
 **Code Reviewer**: [@mingaoo](https://github.com/mingaoo)<br>
