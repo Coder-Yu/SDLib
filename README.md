@@ -1,4 +1,4 @@
-<img src="http://upload.ouliu.net/i/20171229203635lwns3.png" width="250" height="75" />
+<h1>SDLib<h1>
 
 **Founder**: [@Coder-Yu ](https://github.com/Coder-Yu)</br>
 **Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian) [@DouTong](https://github.com/DouTong)<br>
