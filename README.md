@@ -3,7 +3,7 @@
 **Founder**: [@Coder-Yu ](https://github.com/Coder-Yu)</br>
 **Main Contributors**: [@somnussyq](https://github.com/somnussyq) [@hustzhoutian](https://github.com/hustzhoutian) [@DouTong](https://github.com/DouTong)<br>
 **Code Reviewer**: [@mingaoo](https://github.com/mingaoo)<br>
-SDLib: A Python library used to collect shilling detection methods. (for academic research)
+SDLib: A Python library used to collect shilling detection methods (python 2.7.x). (for academic research)
 <h2>How to Run it</h2>
 <ul>
 <li>1.Configure the **xx.conf** file in the directory named config. (xx is the name of the method you want to run)</li>
