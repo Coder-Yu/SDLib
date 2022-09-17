@@ -44,7 +44,7 @@ class BandWagonAttack(Attack):
         markedItemsCount = int(round(random.gauss(mu, sigma)))
         if markedItemsCount < 0:
             markedItemsCount = 0
-        markedItems = np.random.randint(len(self.itemProfile), size=markedItemsCount)
+        markedItems = random.sample(range(len(self.itemProfile)), markedItemsCount)
         return markedItems
 
     def getSelectedItems(self):
@@ -52,6 +52,6 @@ class BandWagonAttack(Attack):
         mu = int(self.selectedSize * len(self.itemProfile))
         sigma = int(0.1 * mu)
         markedItemsCount = abs(int(round(random.gauss(mu, sigma))))
-        markedIndexes =  np.random.randint(len(self.hotItems), size=markedItemsCount)
+        markedIndexes = random.sample(range(len(self.hotItems)), markedItemsCount)
         markedItems = [self.hotItems[index][0] for index in markedIndexes]
         return markedItems
