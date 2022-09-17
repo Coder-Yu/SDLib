@@ -66,7 +66,7 @@ class Attack(object):
         mu = int(self.fillerSize*len(self.itemProfile))
         sigma = int(0.1*mu)
         markedItemsCount = abs(int(round(random.gauss(mu, sigma))))
-        markedItems = np.random.randint(len(self.itemProfile), size=markedItemsCount)
+        markedItems = random.sample(range(len(self.itemProfile)), markedItemsCount)
         return markedItems.tolist()
 
     def insertSpam(self,startID=0):
